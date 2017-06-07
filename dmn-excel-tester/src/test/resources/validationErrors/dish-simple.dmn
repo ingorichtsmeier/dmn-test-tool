@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" id="definitions_0ec3u3h" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="Dish">
+    <decisionTable id="decisionTable">
+      <input id="input1" label="Season">
+        <inputExpression id="inputExpression1" typeRef="string">        <text></text>
+</inputExpression>
+        <inputValues id="UnaryTests_0uxetqb">        <text><![CDATA["Winter","Spring","Summer","Fall"]]></text>
+</inputValues>
+      </input>
+      <input id="InputClause_1dvpi5l" label="Number of guests">
+        <inputExpression id="LiteralExpression_1rn3r2b" typeRef="integer" />
+      </input>
+      <output id="output1" label="Dish" name="" typeRef="string" />
+      <rule id="row-436526256-1">
+        <inputEntry id="UnaryTests_00jceeu">        <text><![CDATA["Winter"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_16fbeyi">        <text><![CDATA[<= 8]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0xi8n71">        <text><![CDATA["Roastbeef"]]></text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

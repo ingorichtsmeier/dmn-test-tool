@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="definitions_1pkotyf" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="Dish">
+    <decisionTable id="decisionTable">
+      <input id="input1" label="Season" camunda:inputVariable="">
+        <inputExpression id="inputExpression1" typeRef="string">        <text></text>
+</inputExpression>
+        <inputValues id="UnaryTests_0fof2ns">        <text><![CDATA["Winter","Spring","Summer","Fall"]]></text>
+</inputValues>
+      </input>
+      <input id="InputClause_1mztunm" label="Number of guests">
+        <inputExpression id="LiteralExpression_0qgoqj0" typeRef="integer" />
+      </input>
+      <output id="output1" label="Dish" name="" typeRef="string" />
+      <rule id="row-436526256-2">
+        <inputEntry id="UnaryTests_1l0wl7t">        <text><![CDATA["Winter"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_1yl2p54">        <text><![CDATA[<= 8]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_1nzoivz">        <text><![CDATA["Roastbeef"]]></text>
+</outputEntry>
+      </rule>
+      <rule id="row-436526256-3">
+        <inputEntry id="UnaryTests_0emmd26">        <text><![CDATA["Spring"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_03bfar7">        <text><![CDATA[<= 4]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0wbjbxz">        <text><![CDATA["Dry aged gourmet steak"]]></text>
+</outputEntry>
+      </rule>
+      <rule id="row-436526256-4">
+        <inputEntry id="UnaryTests_06j20cs">        <text><![CDATA["Spring"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_0vp3y1y">        <text>[5..8]</text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_00kdcls">        <text><![CDATA["Steak"]]></text>
+</outputEntry>
+      </rule>
+      <rule id="row-436526256-5">
+        <inputEntry id="UnaryTests_1cv0iyv">        <text><![CDATA["Fall"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_0g30axn">        <text><![CDATA[<= 8]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0xfy4op">        <text><![CDATA["Spareribs"]]></text>
+</outputEntry>
+      </rule>
+      <rule id="row-436526256-6">
+        <inputEntry id="UnaryTests_08b4z3m">        <text><![CDATA["Winter", "Spring", "Fall"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_03jeev1">        <text><![CDATA[> 8]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_1b19oju">        <text><![CDATA["Stew"]]></text>
+</outputEntry>
+      </rule>
+      <rule id="row-436526256-7">
+        <inputEntry id="UnaryTests_1h51nk1">        <text><![CDATA["Summer"]]></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_06nflba">        <text></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_1vhznvh">        <text><![CDATA["Light salad and a nice steak"]]></text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
