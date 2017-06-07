@@ -30,4 +30,24 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+  <build>
+    <finalName>${artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <!-- run it with 'mvn clean compile assembly:single' -->
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.camunda.consulting.dmn_excel_tester.DmnExcelTester</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>  
+    </plugins>
+  </build>
 </project>
