@@ -13,3 +13,10 @@ A Header line contains the input and output names from the decision tables. The 
 Then you can run the java program `com.camunda.consulting.dmn_excel_tester.DmnExcelTester` with the filenames of the dmn table and the excel sheet and check the outputs for the result.
 
 ![Console output](documentation/console-output.png)
+
+## Build and run
+
+Run `mvn clean compile assembly:single` to create a single jar.
+
+Start the evaluation with `java -jar target\dmn-excel-tester-jar-with-dependencies.jar dmnFile excelFile`.
+   
