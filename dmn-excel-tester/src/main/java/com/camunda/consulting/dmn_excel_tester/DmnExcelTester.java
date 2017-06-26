@@ -2,6 +2,7 @@ package com.camunda.consulting.dmn_excel_tester;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,12 +21,51 @@ import com.camunda.consulting.dmn_excel_tester.logic.DmnEvaluator;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelDmnValidator;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelSheetReader;
 
-public class DmnExcelTester {
+import javafx.application.Application;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
+
+public class DmnExcelTester extends Application {
   
   private static final Logger log = LoggerFactory.getLogger(DmnExcelTester.class);
   
+  String excelSheetFilename;
+  String dmnFileName;
+
   public static void main(String[] args) throws Docx4JException, Xlsx4jException {
+    DmnExcelTester dmnExcelTester = new DmnExcelTester();
+    dmnExcelTester.evaluateDecisionsFromExcelInput(args);
+  }
+
+  public void evaluateDecisionsFromExcelInput(String[] args) throws Docx4JException, Xlsx4jException {
     // handle the input args
+    if (args.length == 0) {
+      launch(args);
+      System.exit(0);
+    }
+    
     if (args.length < 2) {
       printUsage();
     }
@@ -39,6 +79,15 @@ public class DmnExcelTester {
     
     // create the decision
     System.out.println(MessageFormat.format("Test of DMN table ''{0}''\nwith values from Excel sheet ''{1}''\n", dmnFileName, excelSheetFilename));
+    
+    List<Map<String, Object>> expectationsMismatches = readAndEvaluateDecsions(excelSheetFilename, dmnFileName);
+    
+    System.out.println("Results:");
+    System.out.println(formatResultsForGui(expectationsMismatches));
+    // save the results in a new tab and mark the results 'green' or 'red'
+  }
+
+  public List<Map<String, Object>> readAndEvaluateDecsions(String excelSheetFilename, String dmnFileName) throws Docx4JException, Xlsx4jException {
     File dmnTableFile = new File(dmnFileName);
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
     
@@ -63,34 +112,186 @@ public class DmnExcelTester {
     List<DmnDecision> decisions = dmnEngine.parseDecisions(dmnModelInstance);
     DmnEvaluator dmnEvaluator = new DmnEvaluator(decisions, dataFromExcel);
     List<Map<String,Object>> expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
-    
-    System.out.println("Results:");
+    return expectationsMismatches;
+  }
+
+  public List<Text> formatResultsForGui(List<Map<String, Object>> expectationsMismatches) {
+    List<Text> result = new ArrayList<Text>();
     int i = 0;
     for (Map<String, Object> mismatchLine : expectationsMismatches) {
       if (i != 0) {
         if (mismatchLine.isEmpty()) {
-          System.out.println(MessageFormat.format("Line {0} correct \n", i));
+          Text correctLine = new Text(MessageFormat.format("Line {0}: correct \n\n", i));
+          correctLine.setFill(Color.GREEN);
+          result.add(correctLine);
         } else {
-          System.out.println(MessageFormat.format("Line {0} with errors:", i));
+          StringBuilder errorLineBuilder = new StringBuilder();
+          errorLineBuilder.append(MessageFormat.format("Line {0} with errors:\n", i));
           for (String key : mismatchLine.keySet()) {
             EvaluatedResult evaluatedResult = (EvaluatedResult)mismatchLine.get(key);
-            System.out.println(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''", 
+            errorLineBuilder.append(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''\n", 
                 key, 
                 evaluatedResult.getExpected(), 
                 evaluatedResult.getResult()));
           }
-          System.out.println();
+          errorLineBuilder.append('\n');
+          Text errorLine = new Text(errorLineBuilder.toString());
+          errorLine.setFill(Color.RED);
+          result.add(errorLine);
         }
       }
       i++;
     }
-    // save the results in a new tab and mark the results 'green' or 'red'
-
+    return result;
   }
-
-  private static void printUsage() {
+  
+  private void printUsage() {
     System.out.println("usage: java -jar whatever dmnFile.dmn excelSheet.xlxs" );
     System.exit(1);
+  }
+  
+  File recentDirectory = new File(System.getProperty("user.home"));
+  FileChooser dmnFileChooser = new FileChooser();
+  FileChooser excelFileChooser = new FileChooser();
+  
+  @Override
+  public void start(Stage primaryStage) throws Exception {
+    primaryStage.setTitle("Dmn Evaluator");
+    
+    dmnFileChooser.setTitle("Choose a Dmn File");
+    dmnFileChooser.getExtensionFilters().addAll(
+        new ExtensionFilter("Dmn Files", "*.dmn"),
+        new ExtensionFilter("All files", "*.*"));
+    dmnFileChooser.setInitialDirectory(recentDirectory);
+    excelFileChooser.setTitle("Choose an Excel File");
+    excelFileChooser.getExtensionFilters().addAll(
+        new ExtensionFilter("Excel Files", "*.xlsx"),
+        new ExtensionFilter("All Files", "*.*"));
+    excelFileChooser.setInitialDirectory(recentDirectory);
+    
+    ProgressIndicator progressIndicator = new ProgressIndicator();
+    progressIndicator.setMaxSize(25, 25);
+    progressIndicator.setVisible(false);
+
+    GridPane grid = new GridPane();
+    grid.setAlignment(Pos.TOP_LEFT);
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.setPadding(new Insets(25, 25, 25, 25));
+
+    Text scenetitle = new Text("Evaluate Decisions");
+    scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+    grid.add(scenetitle, 0, 0, 2, 1);
+
+    Label dmnName = new Label("DMN File:");
+    grid.add(dmnName, 0, 1);
+
+    TextField dmnFileField = new TextField();
+    dmnFileField.setPrefColumnCount(50);
+    grid.add(dmnFileField, 1, 1);
+
+    Button selectDmnFile = new Button("Select Dmn File");
+    grid.add(selectDmnFile, 2, 1);
+    
+    selectDmnFile.setOnAction((final ActionEvent e) -> {
+      File file = dmnFileChooser.showOpenDialog(primaryStage);
+      if (file != null) {
+          dmnFileName = file.getAbsoluteFile().getPath();
+          setRecentDirectoryToFileChooser(file);
+          dmnFileField.setText(dmnFileName);
+      }
+    });
+
+    Label excelLabel = new Label("Excel File:");
+    grid.add(excelLabel, 0, 2);
+
+    TextField excelFileField = new TextField();
+    grid.add(excelFileField, 1, 2);
+
+    Button selectExcelFile = new Button("Select Excel File");
+    grid.add(selectExcelFile, 2, 2);
+    
+    selectExcelFile.setOnAction((final ActionEvent e) -> {
+      File file = excelFileChooser.showOpenDialog(primaryStage);
+      if (file != null) {
+        excelSheetFilename = file.getAbsoluteFile().getPath();
+        setRecentDirectoryToFileChooser(file);
+        excelFileField.setText(excelSheetFilename);
+      }
+    });
+
+    Button evaluateBtn = new Button("Evaluate");
+    HBox evaluateAndProgressBox = new HBox(10, evaluateBtn, progressIndicator);
+    grid.add(evaluateAndProgressBox, 1, 4);
+
+    VBox resultLabelBox = new VBox();
+    Label resultLabel = new Label("Result:");
+    resultLabelBox.getChildren().add(resultLabel);
+    grid.add(resultLabelBox, 0, 6);
+
+    final TextFlow resultArea = new TextFlow();
+    ScrollPane scrollPane = new ScrollPane(resultArea);
+    scrollPane.setPrefHeight(200);
+    grid.add(scrollPane, 1, 6);
+
+    evaluateBtn.setOnAction((final ActionEvent e) -> handleEvaluateButton(resultArea, progressIndicator));
+    
+    ColumnConstraints column1Constraints = new ColumnConstraints();
+    ColumnConstraints column2Constraints = new ColumnConstraints();
+    column2Constraints.setHgrow(Priority.ALWAYS);
+    ColumnConstraints column3Constraints = new ColumnConstraints();
+    grid.getColumnConstraints().addAll(column1Constraints, column2Constraints, column3Constraints);
+    
+    RowConstraints row1Constraints = new RowConstraints();
+    RowConstraints row2Constraints = new RowConstraints();
+    RowConstraints row3Constraints = new RowConstraints();
+    RowConstraints row4Constraints = new RowConstraints();
+    RowConstraints row5Constraints = new RowConstraints();
+    RowConstraints row6Constraints = new RowConstraints();
+    RowConstraints row7Constraints = new RowConstraints();
+    row7Constraints.setVgrow(Priority.ALWAYS);
+    grid.getRowConstraints().addAll(row1Constraints, row2Constraints, row3Constraints, row4Constraints, row5Constraints, row6Constraints, row7Constraints);
+        
+    Scene scene = new Scene(grid/*, 300, 275*/);
+    primaryStage.setScene(scene);
+
+    primaryStage.show();
+    
+  }
+  
+  private void handleEvaluateButton(TextFlow resultArea, ProgressIndicator progressIndicator) {
+    if (progressIndicator.isVisible()) {
+      return;
+    }
+    
+    progressIndicator.setVisible(true);
+    resultArea.getChildren().clear();
+    
+    Task<List<Text>> resultLoader = new Task<List<Text>>() {
+      {
+        setOnSucceeded(workerStateEvent -> {
+          resultArea.getChildren().addAll(getValue());
+          progressIndicator.setVisible(false); // stop displaying the loading indicator
+        });
+
+        setOnFailed(workerStateEvent -> getException().printStackTrace());
+      }
+
+      @Override
+      protected List<Text> call() throws Exception {
+        return formatResultsForGui(readAndEvaluateDecsions(excelSheetFilename, dmnFileName));
+      }
+    };
+
+    Thread loadingThread = new Thread(resultLoader, "evaluator");
+    loadingThread.setDaemon(true);
+    loadingThread.start();      
+  }
+  
+  private void setRecentDirectoryToFileChooser(File file) {
+    recentDirectory = file.getAbsoluteFile().getParentFile();
+    dmnFileChooser.setInitialDirectory(recentDirectory);
+    excelFileChooser.setInitialDirectory(recentDirectory);
   }
 
 }
