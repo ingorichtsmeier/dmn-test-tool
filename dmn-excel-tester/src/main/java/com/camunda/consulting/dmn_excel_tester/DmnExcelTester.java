@@ -128,11 +128,15 @@ public class DmnExcelTester extends Application {
           StringBuilder errorLineBuilder = new StringBuilder();
           errorLineBuilder.append(MessageFormat.format("Line {0} with errors:\n", i));
           for (String key : mismatchLine.keySet()) {
-            EvaluatedResult evaluatedResult = (EvaluatedResult)mismatchLine.get(key);
-            errorLineBuilder.append(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''\n", 
-                key, 
-                evaluatedResult.getExpected(), 
-                evaluatedResult.getResult()));
+            if (mismatchLine.get(key) instanceof EvaluatedResult) {
+              EvaluatedResult evaluatedResult = (EvaluatedResult)mismatchLine.get(key);
+              errorLineBuilder.append(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''\n", 
+                  key, 
+                  evaluatedResult.getExpected(), 
+                  evaluatedResult.getResult()));
+            } else if (mismatchLine.get(key) instanceof String) {
+              errorLineBuilder.append(mismatchLine.get(key));
+            }
           }
           errorLineBuilder.append('\n');
           Text errorLine = new Text(errorLineBuilder.toString());

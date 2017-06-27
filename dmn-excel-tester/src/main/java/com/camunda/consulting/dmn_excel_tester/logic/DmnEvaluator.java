@@ -10,6 +10,7 @@ import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnDecisionResultEntries;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
+import org.camunda.bpm.dmn.engine.impl.hitpolicy.DmnHitPolicyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,13 +43,19 @@ public class DmnEvaluator {
       for (int i = 2; i < testData.size(); i++) {
         Map<String, Object> decisionData = testData.get(i);
         Map<String, Object> expectedResultData = expectationMapper.getExpectationData(testData.get(i));
-        DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
-        HashMap<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result);
-        log.info("Result: {}", result.getResultList());
-        for (DmnDecisionResultEntries resultEntries : result) {
-          log.info("ResultEntries {}", resultEntries.toString());
+        try {
+          DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
+          HashMap<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result);
+          log.info("Result: {}", result.getResultList());
+          for (DmnDecisionResultEntries resultEntries : result) {
+            log.info("ResultEntries {}", resultEntries.toString());
+          }
+          unexpectedResultList.add(unexpectedResult);
+        } catch (DmnHitPolicyException e) {
+          HashMap<String, Object> errorMap = new HashMap<String, Object>();
+          errorMap.put("error:", e.getLocalizedMessage());
+          unexpectedResultList.add(errorMap);
         }
-        unexpectedResultList.add(unexpectedResult);
       }
     }
     log.info("\n");

@@ -158,5 +158,25 @@ public class DmnEvaluatorTest {
     DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(decisions.get(0), decisionInput);
     return decisionResult;
   }
+  
+  @Test
+  public void testHitPolicyError() throws Docx4JException, Xlsx4jException {
+    File dmnTableFile = new File("src/test/resources/hitPolicy/determine-employee-1.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(dmnModelInstance);
+    
+    File excelFile = new File("src/test/resources/hitPolicy/determine-employee-1Expected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    
+    DmnEvaluator dmnEvaluator = new DmnEvaluator(decisions, dataFromExcel);
+    List<Map<String, Object>> decisionResults = dmnEvaluator.evaluateAllExpectations();
+    assertThat(decisionResults).hasSize(3);
+    assertThat(decisionResults.get(2)).containsKey("error:");
+    String errorMessage = (String) decisionResults.get(2).get("error:");
+    assertThat(errorMessage).startsWith("DMN-03001 Hit policy 'UNIQUE' only allows a single rule to match.");
+  }
 
 }
