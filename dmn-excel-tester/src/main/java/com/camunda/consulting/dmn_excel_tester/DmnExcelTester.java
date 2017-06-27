@@ -3,6 +3,7 @@ package com.camunda.consulting.dmn_excel_tester;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.xlsx4j.exceptions.Xlsx4jException;
 
 import com.camunda.consulting.dmn_excel_tester.data.EvaluatedResult;
 import com.camunda.consulting.dmn_excel_tester.logic.DmnEvaluator;
+import com.camunda.consulting.dmn_excel_tester.logic.DmnTablePreparer;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelDmnValidator;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelSheetReader;
 
@@ -90,6 +92,8 @@ public class DmnExcelTester extends Application {
   public List<Map<String, Object>> readAndEvaluateDecsions(String excelSheetFilename, String dmnFileName) throws Docx4JException, Xlsx4jException {
     File dmnTableFile = new File(dmnFileName);
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(dmnModelInstance);
+    DmnModelInstance preparedTable = dmnTablePreparer.prepareTable();
     
     // open the excel file
     File excelFile = new File(excelSheetFilename);
@@ -99,19 +103,22 @@ public class DmnExcelTester extends Application {
     List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     // validate the excel to decision
-    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, dmnModelInstance);
+    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, preparedTable);
+    List<Map<String,Object>> expectationsMismatches = new ArrayList<Map<String, Object>>();
     List<String> validationResult = excelDmnValidator.validateMatchingExcelAndDmnModel();
     if (validationResult.size() > 0) {
-      System.out.println("Excelsheet doesn't fit to the dmn table: ");
-      System.out.println(validationResult.toString());
-      System.exit(2);
+      expectationsMismatches.add(new HashMap<>());
+      HashMap<String, Object> validatonErrorMessage = new HashMap<>();
+      validatonErrorMessage.put("error:", "Excelsheet doesn't fit to the dmn table: ");
+      validatonErrorMessage.put("details:", validationResult.toString());
+      expectationsMismatches.add(validatonErrorMessage);
+    } else {    
+      // evaluate the decisions with values from the excel sheet
+      DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+      List<DmnDecision> decisions = dmnEngine.parseDecisions(dmnModelInstance);
+      DmnEvaluator dmnEvaluator = new DmnEvaluator(decisions, dataFromExcel);
+      expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
     }
-    
-    // evaluate the decisions with values from the excel sheet
-    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
-    List<DmnDecision> decisions = dmnEngine.parseDecisions(dmnModelInstance);
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(decisions, dataFromExcel);
-    List<Map<String,Object>> expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
     return expectationsMismatches;
   }
 
