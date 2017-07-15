@@ -36,7 +36,7 @@
   </dependencies>
   
   <build>
-    <finalName>${artifactId}</finalName>
+    <finalName>dmn-evaluator</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -59,6 +59,8 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+          <!-- Ignore the warning: https://stackoverflow.com/questions/34695506/renaming-a-fat-jar-with-maven -->
+          <appendAssemblyId>false</appendAssemblyId>
         </configuration>
       </plugin>  
     </plugins>
