@@ -53,7 +53,10 @@ public class DmnEvaluator {
           unexpectedResultList.add(unexpectedResult);
         } catch (DmnHitPolicyException e) {
           HashMap<String, Object> errorMap = new HashMap<String, Object>();
-          errorMap.put("error:", e.getLocalizedMessage());
+          String errorMessage = e.getLocalizedMessage();
+          errorMessage = errorMessage.replaceAll("\\.", ".\n");
+          errorMessage = errorMessage.replaceAll("DmnEvaluatedDecisionRule", "\nDmEvaluatedDecisionRule");
+          errorMap.put("error:", errorMessage);
           unexpectedResultList.add(errorMap);
         }
       }
