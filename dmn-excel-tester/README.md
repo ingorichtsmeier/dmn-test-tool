@@ -10,7 +10,11 @@ A Header line contains the input and output names from the decision tables. The 
 
 ![Excel example](documentation/excel-example.png)
 
-Then you can run the java program `com.camunda.consulting.dmn_excel_tester.DmnExcelTester` with the filenames of the dmn table and the excel sheet and check the outputs for the result.
+You can open the User Interface of the DMN Evaluator and upload the DMN table and the excel sheet to evaluate the decisions with the given values. Inspect the results:
+
+![DMN evaluator](documentation/dmn-evaluator.png)
+
+For background testing you can run the java program `com.camunda.consulting.dmn_excel_tester.DmnExcelTester` with the filenames of the dmn table and the excel sheet from the console and check the outputs for the result.
 
 ![Console output](documentation/console-output.png)
 
