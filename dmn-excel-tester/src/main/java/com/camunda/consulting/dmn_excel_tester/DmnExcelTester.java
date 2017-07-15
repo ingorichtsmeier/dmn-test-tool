@@ -34,7 +34,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -51,6 +54,9 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class DmnExcelTester extends Application {
   
+  private static final Font helvetica21 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.NORMAL, 21);
+  private static final Font helvetica14 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.NORMAL, 14);
+
   private static final Logger log = LoggerFactory.getLogger(DmnExcelTester.class);
   
   String excelSheetFilename;
@@ -130,6 +136,7 @@ public class DmnExcelTester extends Application {
         if (mismatchLine.isEmpty()) {
           Text correctLine = new Text(MessageFormat.format("Line {0}: correct \n\n", i));
           correctLine.setFill(Color.GREEN);
+          correctLine.setFont(helvetica14);
           result.add(correctLine);
         } else {
           StringBuilder errorLineBuilder = new StringBuilder();
@@ -148,6 +155,7 @@ public class DmnExcelTester extends Application {
           errorLineBuilder.append('\n');
           Text errorLine = new Text(errorLineBuilder.toString());
           errorLine.setFill(Color.RED);
+          errorLine.setFont(helvetica14);
           result.add(errorLine);
         }
       }
@@ -188,13 +196,26 @@ public class DmnExcelTester extends Application {
     grid.setAlignment(Pos.TOP_LEFT);
     grid.setHgap(10);
     grid.setVgap(10);
-    grid.setPadding(new Insets(25, 25, 25, 25));
+    grid.setPadding(new Insets(10, 10, 10, 10));
+    grid.setBackground(
+        new Background(
+            new BackgroundFill(
+                Color.WHITE, 
+                new CornerRadii(5.0), 
+                new Insets(0.0, 5.0, 0.0, 5.0))));
 
-    Text scenetitle = new Text("Evaluate Decisions");
-    scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-    grid.add(scenetitle, 0, 0, 2, 1);
+    HBox titleBox = new HBox();
+    Text logo = new Text('\ue831' + "");
+    logo.setFont(Font.loadFont(getClass().getResourceAsStream("/assets/fonts/bpmn.woff"), 21));
+    logo.setFill(Color.web("#b5152b"));
+    Text scenetitle = new Text(" DMN Evaluator");
+    scenetitle.setFont(helvetica21);
+    titleBox.getChildren().addAll(logo, scenetitle);
+    titleBox.setAlignment(Pos.CENTER_LEFT);
+    grid.add(titleBox, 0, 0, 2, 1);
 
     Label dmnName = new Label("DMN File:");
+    dmnName.setFont(helvetica14);
     grid.add(dmnName, 0, 1);
 
     TextField dmnFileField = new TextField();
@@ -202,6 +223,7 @@ public class DmnExcelTester extends Application {
     grid.add(dmnFileField, 1, 1);
 
     Button selectDmnFile = new Button("Select Dmn File");
+    selectDmnFile.setFont(helvetica14);
     grid.add(selectDmnFile, 2, 1);
     
     selectDmnFile.setOnAction((final ActionEvent e) -> {
@@ -214,12 +236,14 @@ public class DmnExcelTester extends Application {
     });
 
     Label excelLabel = new Label("Excel File:");
+    excelLabel.setFont(helvetica14);
     grid.add(excelLabel, 0, 2);
 
     TextField excelFileField = new TextField();
     grid.add(excelFileField, 1, 2);
 
     Button selectExcelFile = new Button("Select Excel File");
+    selectExcelFile.setFont(helvetica14);
     grid.add(selectExcelFile, 2, 2);
     
     selectExcelFile.setOnAction((final ActionEvent e) -> {
@@ -232,11 +256,13 @@ public class DmnExcelTester extends Application {
     });
 
     Button evaluateBtn = new Button("Evaluate");
+    evaluateBtn.setFont(helvetica14);
     HBox evaluateAndProgressBox = new HBox(10, evaluateBtn, progressIndicator);
     grid.add(evaluateAndProgressBox, 1, 4);
 
     VBox resultLabelBox = new VBox();
     Label resultLabel = new Label("Result:");
+    resultLabel.setFont(helvetica14);
     resultLabelBox.getChildren().add(resultLabel);
     grid.add(resultLabelBox, 0, 6);
 
