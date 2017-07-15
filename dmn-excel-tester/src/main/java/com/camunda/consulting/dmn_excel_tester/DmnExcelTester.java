@@ -30,6 +30,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
@@ -273,10 +274,10 @@ public class DmnExcelTester extends Application {
 
     evaluateBtn.setOnAction((final ActionEvent e) -> handleEvaluateButton(resultArea, progressIndicator));
     
-    ColumnConstraints column1Constraints = new ColumnConstraints();
+    ColumnConstraints column1Constraints = new ColumnConstraints(Control.USE_COMPUTED_SIZE);
     ColumnConstraints column2Constraints = new ColumnConstraints();
     column2Constraints.setHgrow(Priority.ALWAYS);
-    ColumnConstraints column3Constraints = new ColumnConstraints();
+    ColumnConstraints column3Constraints = new ColumnConstraints(Control.USE_COMPUTED_SIZE);
     grid.getColumnConstraints().addAll(column1Constraints, column2Constraints, column3Constraints);
     
     RowConstraints row1Constraints = new RowConstraints();
