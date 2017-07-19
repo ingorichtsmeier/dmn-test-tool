@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.camunda.bpm.dmn.engine.DmnDecision;
-import org.camunda.bpm.dmn.engine.DmnEngine;
-import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -121,9 +118,7 @@ public class DmnExcelTester extends Application {
       expectationsMismatches.add(validatonErrorMessage);
     } else {    
       // evaluate the decisions with values from the excel sheet
-      DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
-      List<DmnDecision> decisions = dmnEngine.parseDecisions(dmnModelInstance);
-      DmnEvaluator dmnEvaluator = new DmnEvaluator(decisions, dataFromExcel);
+      DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel);
       expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
     }
     return expectationsMismatches;

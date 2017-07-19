@@ -1,6 +1,7 @@
 package com.camunda.consulting.dmn_excel_tester;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,17 @@ public class ExcelSheetReaderTest {
         entry("Expected:_Dish", "Dry aged gourmet steak"), 
         entry("Expected:_Amount", "3"), 
         entry("Expected:_Unit", "Small Pieces"));
+  }
+  
+  @Test
+  public void testReadExcelSheetCollectHitPolicy() throws Docx4JException, Xlsx4jException {
+    File excelFile = new File("src/test/resources/collect/beveragesExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    assertThat(dataFromExcel.get(2)).containsOnly(
+        entry("Dish", "Spareribs"),
+        entry("Guests_with_Children", "true"),
+        entry("Expected:_Drinks", Arrays.asList("Aecht Schlenkerla Rauchbier", "Apple Juice", "Water")));
   }
   
   @Test

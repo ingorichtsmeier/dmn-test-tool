@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.xml.bind.JAXBElement;
 
@@ -78,14 +79,29 @@ public class ExcelSheetReader {
           if (cell.getT().equals(STCellType.S)) {
             String cellValue = sharedStrings.getJaxbElement().getSi().get(Integer.parseInt(cell.getV())).getT().getValue();
             log.info("  {} (S) contains {}", cell.getR(), cellValue);
-            // cell.getR() enthält Koordinaten A1, B2 oder C3 (Spalte, Zeile)
+            // cell.getR() contains coordinates A1, B2 or C3 (Column, Row)
             if (rowIndex.equals(1L)) {
+              // handle header 
               headerContent.put(coordinates.getColumnName(), cellValue); //.replaceAll("[ -]+", "_")
               log.info("Set header column {} to {}", coordinates.getColumnName(), cellValue);
             } else {
+              // handle content
               String columnNameEscaped = ((String) headerContent.get(coordinates.getColumnName())).replaceAll("[ -]+", "_");
-              rowContent.put(columnNameEscaped, cellValue); 
-              log.info("Fill key {} with content {}", columnNameEscaped, cellValue);
+              if (cellValue.contains(";")) {
+                // it's a list for hitpolicy collect
+                StringTokenizer stringTokenizer = new StringTokenizer(cellValue, ";", false);
+                List<String> cellList = new ArrayList<String>();
+                while (stringTokenizer.hasMoreElements()) {
+                  String cellElement = (String) stringTokenizer.nextElement();
+                  cellList.add(cellElement.trim());
+                }
+                rowContent.put(columnNameEscaped, cellList);
+                log.info("Fill key {} with list {}", columnNameEscaped, cellList);
+              } else {
+                // it's just an ordinary string
+                rowContent.put(columnNameEscaped, cellValue);
+                log.info("Fill key {} with content {}", columnNameEscaped, cellValue);
+              }
             }
           } else {
             // TODO: handle other cell types
