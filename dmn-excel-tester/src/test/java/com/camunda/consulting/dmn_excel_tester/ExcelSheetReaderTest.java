@@ -61,6 +61,16 @@ public class ExcelSheetReaderTest {
   }
   
   @Test
+  public void testReadExcelSheetWithSpecialCharacters() throws Docx4JException, Xlsx4jException {
+    File excelFile = new File("src/test/resources/dmnPreparation/boolean-inputExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    assertThat(dataFromExcel.get(2)).containsOnly(
+        entry("Claim_region_identical_", "true"),
+        entry("Expected:_Score", "0.9"));
+  }
+  
+  @Test
   public void testCoordinateGetterA1() {
     String cellCoordinates = "A1";
     Coordinates coordinates = new Coordinates(cellCoordinates);

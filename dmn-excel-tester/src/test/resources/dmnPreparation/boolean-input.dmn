@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" id="definitions_11v2126" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="Evaluate boolean">
+    <decisionTable id="decisionTable">
+      <input id="input1" label="Claim region identical?">
+        <inputExpression id="inputExpression1" typeRef="boolean">        <text></text>
+</inputExpression>
+      </input>
+      <output id="output1" label="Score" name="" typeRef="double" />
+      <rule id="row-100815457-13">
+        <inputEntry id="UnaryTests_1647pjj">        <text>true</text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_1q5j25u">        <text>0.9</text>
+</outputEntry>
+      </rule>
+      <rule id="row-100815457-14">
+        <inputEntry id="UnaryTests_1xpxu5k">        <text>false</text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_17lc9qk">        <text>0.1</text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

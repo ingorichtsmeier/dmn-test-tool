@@ -70,4 +70,22 @@ public class DmnTablePrepareTest {
     assertThat(result.getFirstResult()).containsEntry("Dish", "Light salad and a nice steak");
   }
   
+  @Test
+  public void testBooleanInputWithQuestionMark() {
+    File decisionTableFile = new File("src/test/resources/dmnPreparation/boolean-input.dmn");
+    DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
+    
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(modelInstance);
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable();
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
+    Map<String, Object> inputVariables = new HashMap<String, Object>();
+    inputVariables.put("Claim_region_identical_", true);
+    DmnDecisionResult result = dmnEngine.evaluateDecision(decisions.get(0), inputVariables);
+    
+    assertThat(result.getFirstResult()).containsEntry("Score", 0.9);
+    
+  }
+  
 }

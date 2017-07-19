@@ -33,7 +33,7 @@ public class DmnTablePreparer {
       } else {
         log.info("input expression content is empty");
       }
-      String inputExpressionContent = inputElement.getLabel().replaceAll("[ -]", "_"); 
+      String inputExpressionContent = inputElement.getLabel().replaceAll("[\\? -]", "_");
       Text textElement = modelInstance.newInstance(Text.class);
       textElement.setTextContent(inputExpressionContent);
       inputExpression.setText(textElement);
