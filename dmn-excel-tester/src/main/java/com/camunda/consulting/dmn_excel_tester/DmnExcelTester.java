@@ -28,12 +28,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
@@ -52,6 +54,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class DmnExcelTester extends Application {
   
+  private static final Font helveticaBold18 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.BOLD, 18);
   private static final Font helvetica21 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.NORMAL, 21);
   private static final Font helvetica14 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.NORMAL, 14);
 
@@ -209,7 +212,20 @@ public class DmnExcelTester extends Application {
     titleBox.getChildren().addAll(logo, scenetitle);
     titleBox.setAlignment(Pos.CENTER_LEFT);
     grid.add(titleBox, 0, 0, 2, 1);
-
+    
+    HBox helpBox = new HBox();
+    Hyperlink link = new Hyperlink("?");
+    link.setFont(helveticaBold18);
+    link.setTextFill(Color.BLACK);
+    link.setBorder(Border.EMPTY);
+    link.setOnAction((ActionEvent e) -> {
+      System.out.println("This link is clicked");
+      getHostServices().showDocument("https://github.com/ingorichtsmeier/dmn-test-tool/wiki/User-Guide");
+    });
+    helpBox.getChildren().add(link);
+    helpBox.setAlignment(Pos.CENTER_RIGHT);
+    grid.add(helpBox, 2, 0);
+    
     Label dmnName = new Label("DMN File:");
     dmnName.setFont(helvetica14);
     grid.add(dmnName, 0, 1);
