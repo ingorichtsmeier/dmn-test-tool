@@ -20,7 +20,7 @@ For background testing you can run the java program `com.camunda.consulting.dmn_
 
 ## Build and run
 
-Run `mvn clean compile assembly:single` to create a single jar.
+Run `mvn clean compile test assembly:single` to create a single jar.
 
 You can ignore the warning from the maven build, as the project only delivers a single jar file and nothing else.
 
