@@ -13,6 +13,7 @@ import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.dmn.engine.impl.DmnDecisionTableImpl;
 import org.camunda.bpm.dmn.engine.impl.hitpolicy.DmnHitPolicyException;
+import org.camunda.bpm.model.dmn.BuiltinAggregator;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.HitPolicy;
 import org.slf4j.Logger;
@@ -48,10 +49,12 @@ public class DmnEvaluator {
     for (DmnDecision dmnDecision : decisions) {
       log.info("Evaluating decision {}", dmnDecision.getName());
       HitPolicy hitPolicy = null;
+      BuiltinAggregator builtinAggregator = null;
       DmnDecisionLogic decisionLogic = dmnDecision.getDecisionLogic();
       if (decisionLogic instanceof DmnDecisionTableImpl) {
         DmnDecisionTableImpl decisionTable = (DmnDecisionTableImpl) decisionLogic;
         hitPolicy = decisionTable.getHitPolicyHandler().getHitPolicyEntry().getHitPolicy();
+        builtinAggregator = decisionTable.getHitPolicyHandler().getHitPolicyEntry().getAggregator();
       };
       log.info("HitPolicy: {}", hitPolicy);
       for (int i = 2; i < testData.size(); i++) {
@@ -60,7 +63,7 @@ public class DmnEvaluator {
         try {
           DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
           log.info("Result: {}", result);
-          HashMap<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result, hitPolicy);
+          HashMap<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result, hitPolicy, builtinAggregator);
           for (DmnDecisionResultEntries resultEntries : result) {
             log.info("ResultEntries {}", resultEntries.toString());
           }

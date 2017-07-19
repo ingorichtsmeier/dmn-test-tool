@@ -12,6 +12,7 @@ import org.camunda.bpm.dmn.engine.DmnDecision;
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
+import org.camunda.bpm.model.dmn.BuiltinAggregator;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.HitPolicy;
@@ -124,7 +125,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE);
+    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).containsEntry("Dish", new EvaluatedResult("Steak", "Stew"));
   }
 
@@ -135,7 +136,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE);
+    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).isEmpty();
   }
 
@@ -173,7 +174,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateBeveragesWithChildrenDmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.COLLECT);
+    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.COLLECT, null);
     assertThat(unexpectedResults).containsEntry("Drinks", new EvaluatedResult(Arrays.asList("Budweiser"), Arrays.asList("Aecht Schlenkerla Rauchbier")));
   }
 
@@ -194,7 +195,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateBeveragesWithUnknownDishAndNoChildrenDmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT);
+    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, null);
     assertThat(unexpectedResults).isEmpty();
   }
 
@@ -221,5 +222,41 @@ public class DmnEvaluatorTest {
     List<Map<String,Object>> expectations = dmnEvaluator.evaluateAllExpectations();
     
     assertThat(expectations).hasSize(4);
+  }
+  
+  @Test
+  public void testUnexpectedResultFromScoring() {
+    HashMap<String, Object> expectedResult = new HashMap<String, Object>();
+    expectedResult.put("Score", "-6");
+    
+    DmnDecisionResult decisionResult = evaluateScoringDmn();
+    ExpectationMapper expectationMapper = new ExpectationMapper();
+    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, BuiltinAggregator.SUM);
+    assertThat(unexpectedResults).containsEntry("Score", new EvaluatedResult("-6", "-5"));
+  }
+
+  private DmnDecisionResult evaluateScoringDmn() {
+    HashMap<String, Object> decisionInput = new HashMap<String, Object>();
+    decisionInput.put("Number_of_claims", 12);
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(Dmn.readModelFromFile(new File("src/test/resources/collect/scoring-fails.dmn")));
+    DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(decisions.get(0), decisionInput);
+    return decisionResult;
+  }
+  
+  @Test
+  public void testEvaluateScoring() throws Docx4JException, Xlsx4jException {
+    File dmnTableFile = new File("src/test/resources/collect/scoring-fails.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
+    
+    File excelFile = new File("src/test/resources/collect/scoring-failsExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    
+    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
+    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult).hasSize(4);
+    assertThat(expectationResult.get(2)).containsEntry("Score", new EvaluatedResult("-6", "-5"));
+    assertThat(expectationResult.get(3)).isEmpty();
   }
 }

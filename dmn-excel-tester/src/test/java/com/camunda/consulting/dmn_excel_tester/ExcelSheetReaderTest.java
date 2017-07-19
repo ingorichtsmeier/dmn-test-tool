@@ -2,6 +2,7 @@ package com.camunda.consulting.dmn_excel_tester;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.xlsx4j.exceptions.Xlsx4jException;
 
 import com.camunda.consulting.dmn_excel_tester.data.Coordinates;
+import com.camunda.consulting.dmn_excel_tester.data.EvaluatedResult;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelSheetReader;
 
 import static org.assertj.core.api.Assertions.*;
@@ -77,7 +79,7 @@ public class ExcelSheetReaderTest {
   }
   
   @Test
-  public void testCoordianteGetterHS30() {
+  public void testCoordinateGetterHS30() {
     String cellCoordiantes = "HC30";
     Coordinates coordinates = new Coordinates(cellCoordiantes);
     assertThat(coordinates.getColumnName()).isEqualTo("HC");
@@ -93,6 +95,17 @@ public class ExcelSheetReaderTest {
     assertThat(coordinates.getColumnName()).isEqualTo("BF");
     assertThat(coordinates.getLineNumber()).isEqualTo(2);
     assertThat(coordinates.getColumnIndex()).isEqualTo(57);
+  }
+  
+  @Test
+  public void testEvaluatedResultEqualsWithInt() {
+    EvaluatedResult result1 = new EvaluatedResult(-5, -6);
+    EvaluatedResult result2 = new EvaluatedResult(-5, -6);
+    Map<String,Object> map = new HashMap<>();
+    map.put("result", result1);
+    assertThat(result1).isEqualTo(result2);
+    assertThat(result2).isEqualTo(map.get("result"));
+    assertThat(map).containsEntry("result", result2);
   }
   
 }

@@ -1,6 +1,11 @@
 package com.camunda.consulting.dmn_excel_tester.data;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class EvaluatedResult {
+  
+  private static final Logger log = LoggerFactory.getLogger(EvaluatedResult.class);
   
   private Object expected;
   private Object result;
@@ -39,7 +44,8 @@ public class EvaluatedResult {
 
   @Override
   public String toString() {
-    return "EvaluatedResult [expected=" + expected + ", result=" + result + "]";
+    return "EvaluatedResult [expected=" + expected + "(" + expected.hashCode() + 
+        "), result=" + result + "(" + result.hashCode() + ")]";
   }
 
 }

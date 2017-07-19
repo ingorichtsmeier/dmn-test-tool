@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="definitions_1qubu58" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="Determine Employee">
+    <decisionTable id="decisionTable" hitPolicy="COLLECT" aggregation="SUM">
+      <input id="input1" label="Number of claims" camunda:inputVariable="">
+        <inputExpression id="inputExpression1" typeRef="integer">        <text>Number_of_claims</text>
+</inputExpression>
+      </input>
+      <output id="output1" label="Score" name="Score" typeRef="integer" />
+      <rule id="row-100815457-10">
+        <inputEntry id="UnaryTests_0u1pqs3">        <text><![CDATA[< 5]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_1kufiru">        <text>2</text>
+</outputEntry>
+      </rule>
+      <rule id="row-100815457-11">
+        <inputEntry id="UnaryTests_00hp4m5">        <text><![CDATA[>= 5]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0qzejm7">        <text>-2</text>
+</outputEntry>
+      </rule>
+      <rule id="row-100815457-12">
+        <inputEntry id="UnaryTests_0v60nl8">        <text><![CDATA[>= 10]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0t61twr">        <text>-3</text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

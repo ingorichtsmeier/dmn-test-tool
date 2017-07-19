@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnDecisionResultEntries;
+import org.camunda.bpm.model.dmn.BuiltinAggregator;
 import org.camunda.bpm.model.dmn.HitPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,10 @@ public class ExpectationMapper {
     return result;
   }
 
-  public HashMap<String, Object> getUnexpectedResults(Map<String, Object> expectedResultData, DmnDecisionResult result, HitPolicy hitPolicy) {
+  public HashMap<String, Object> getUnexpectedResults(Map<String, Object> expectedResultData, 
+      DmnDecisionResult result, 
+      HitPolicy hitPolicy, 
+      BuiltinAggregator builtinAggregator) {
     log.info("Check for unexpected in expected {}; evaluated {} with hitpolicy {}", expectedResultData.toString(), result.toString(), hitPolicy);
     
     // result is a list of map with results per rule  
@@ -46,10 +50,9 @@ public class ExpectationMapper {
     // Iterate over all expectations (columns)
     for (Iterator<String> keys = expectedResultData.keySet().iterator(); keys.hasNext();) {
       String key = (String) keys.next();
-      log.info("Handle list compare for {}", expectedResultData.get(key));
-      
       // If more than one rule match
-      if (hitPolicy.equals(HitPolicy.COLLECT)) {
+      if (hitPolicy.equals(HitPolicy.COLLECT) && 
+          BuiltinAggregator.SUM.equals(builtinAggregator) == false) {
         List<Object> collectEntries = result.collectEntries(key);
         log.info("Reduced result: {}", collectEntries);
         
@@ -83,12 +86,14 @@ public class ExpectationMapper {
         for (Iterator<DmnDecisionResultEntries> iterator = result.iterator(); iterator.hasNext();) {
           DmnDecisionResultEntries dmnDecisionResultEntries = (DmnDecisionResultEntries) iterator.next();
           log.info("iteration of result with {} and key {}", dmnDecisionResultEntries, key);
-          Object entry = dmnDecisionResultEntries.getEntry(key);
-          if (expectedResultData.get(key).equals(entry)) {
-            log.info("Expected result for key {}: {} is found in result {}", key, expectedResultData.get(key), entry);
+          
+          // Convert the decision result to String as all cellValues from Excel are Strings
+          String entryStr = dmnDecisionResultEntries.getEntry(key).toString();
+          if (expectedResultData.get(key).equals(entryStr)) {
+            log.info("Expected result for key {}: {} is found in result {}", key, expectedResultData.get(key), entryStr);
           } else {
-            log.info("Expected result for key {}: {} is not found in result {}", key, expectedResultData.get(key), entry);
-            unexpectedResults.put(key, new EvaluatedResult(expectedResultData.get(key), entry));
+            log.info("Expected result for key {}: {} is not found in result {}", key, expectedResultData.get(key), entryStr);
+            unexpectedResults.put(key, new EvaluatedResult(expectedResultData.get(key), entryStr));
           }
         }
       }
