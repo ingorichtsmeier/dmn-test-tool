@@ -88,6 +88,7 @@ public class DmnExcelTester extends Application {
     
     // create the decision
     System.out.println(MessageFormat.format("Test of DMN table ''{0}''\nwith values from Excel sheet ''{1}''\n", dmnFileName, excelSheetFilename));
+    System.out.println("Version: " + getClass().getPackage().getImplementationVersion());
     
     List<Map<String, Object>> expectationsMismatches = readAndEvaluateDecsions(excelSheetFilename, dmnFileName);
     
@@ -282,6 +283,12 @@ public class DmnExcelTester extends Application {
     ScrollPane scrollPane = new ScrollPane(resultArea);
     scrollPane.setPrefHeight(200);
     grid.add(scrollPane, 1, 6);
+    
+    HBox versionBox = new HBox();
+    Text versionText = new Text("Version: " + getClass().getPackage().getImplementationVersion());
+    versionBox.getChildren().add(versionText);
+    versionBox.setAlignment(Pos.BOTTOM_RIGHT);
+    grid.add(versionBox, 2, 6);
 
     evaluateBtn.setOnAction((final ActionEvent e) -> handleEvaluateButton(resultArea, progressIndicator));
     

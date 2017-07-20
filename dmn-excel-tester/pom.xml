@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.camunda.consulting</groupId>
   <artifactId>dmn-excel-tester</artifactId>
@@ -54,6 +55,8 @@
           <archive>
             <manifest>
               <mainClass>com.camunda.consulting.dmn_excel_tester.DmnExcelTester</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
           </archive>
           <descriptorRefs>
@@ -62,7 +65,7 @@
           <!-- Ignore the warning: https://stackoverflow.com/questions/34695506/renaming-a-fat-jar-with-maven -->
           <appendAssemblyId>false</appendAssemblyId>
         </configuration>
-      </plugin>  
+      </plugin>
     </plugins>
   </build>
 </project>
