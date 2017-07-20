@@ -323,7 +323,19 @@ public class DmnExcelTester extends Application {
           progressIndicator.setVisible(false); // stop displaying the loading indicator
         });
 
-        setOnFailed(workerStateEvent -> getException().printStackTrace());
+        setOnFailed(workerStateEvent -> {
+          String exceptionMessage = getException().getLocalizedMessage();
+          if (getException().getCause() != null) {
+            exceptionMessage = exceptionMessage + 
+              "\nCaused by:\n" + 
+              getException().getCause().getLocalizedMessage();
+          }
+          Text exceptionText = new Text(exceptionMessage);
+          exceptionText.setFill(Color.RED);
+          resultArea.getChildren().addAll(exceptionText);
+          progressIndicator.setVisible(false); // stop displaying the loading indicator
+          getException().printStackTrace();
+        });
       }
 
       @Override
