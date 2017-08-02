@@ -86,7 +86,8 @@ public class ExcelSheetReader {
               log.info("Set header column {} to {}", coordinates.getColumnName(), cellValue);
             } else {
               // handle content
-              String columnNameEscaped = ((String) headerContent.get(coordinates.getColumnName())).replaceAll("[\\? -]+", "_");
+              String columnNameEscaped = ((String) headerContent.get(coordinates.getColumnName()))
+                  .replaceAll(DmnTablePreparer.HEADER_REPLACE_REGEX, "_");
               if (cellValue.contains(";")) {
                 // it's a list for hitpolicy collect
                 StringTokenizer stringTokenizer = new StringTokenizer(cellValue, ";", false);

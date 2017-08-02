@@ -61,13 +61,24 @@ public class ExcelSheetReaderTest {
   }
   
   @Test
-  public void testReadExcelSheetWithSpecialCharacters() throws Docx4JException, Xlsx4jException {
+  public void testReadExcelSheetBooleanInputWithQuestionMark() throws Docx4JException, Xlsx4jException {
     File excelFile = new File("src/test/resources/dmnPreparation/boolean-inputExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
     assertThat(dataFromExcel.get(2)).containsOnly(
         entry("Claim_region_identical_", "true"),
         entry("Expected:_Score", "0.9"));
+  }
+  
+  @Test
+  public void testReadExcelSheetHeadersWithSpecialChars() throws Docx4JException, Xlsx4jException {
+    File excelFile = new File("src/test/resources/dmnPreparation/headers-with-special-charsExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    assertThat(dataFromExcel.get(2)).containsOnly(
+        entry("High_Load___1M_Workflow_Instances___Day_", "true"),
+        entry("Only__Basic_Workflow_Execution__required_", "true"),
+        entry("Expected:_Proposed_Camunda_product", "ZeeBe"));
   }
   
   @Test

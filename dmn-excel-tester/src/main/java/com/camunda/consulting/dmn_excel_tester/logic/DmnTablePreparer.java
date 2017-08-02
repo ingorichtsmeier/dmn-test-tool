@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 public class DmnTablePreparer {
   
+  public static final String HEADER_REPLACE_REGEX = "[\\? -()<>/=]";
+  
   private static final Logger log = LoggerFactory.getLogger(DmnTablePreparer.class);
   private DmnModelInstance modelInstance;
   // private List<Map<String, Object>> headers;
@@ -22,6 +24,12 @@ public class DmnTablePreparer {
     // this.headers = headers;
   }
 
+  /**
+   * Fill the input expressions with the labels of the input elements.
+   * Replace any special characters in the expressions with _.
+   * 
+   * @return decision model with input expressions filled
+   */
   public DmnModelInstance prepareTable() {
     
     Collection<InputExpression> inputExpressions = modelInstance.getModelElementsByType(InputExpression.class);
@@ -33,7 +41,7 @@ public class DmnTablePreparer {
       } else {
         log.info("input expression content is empty");
       }
-      String inputExpressionContent = inputElement.getLabel().replaceAll("[\\? -]", "_");
+      String inputExpressionContent = inputElement.getLabel().replaceAll(HEADER_REPLACE_REGEX, "_");
       Text textElement = modelInstance.newInstance(Text.class);
       textElement.setTextContent(inputExpressionContent);
       inputExpression.setText(textElement);

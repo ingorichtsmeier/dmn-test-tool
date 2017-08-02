@@ -85,7 +85,24 @@ public class DmnTablePrepareTest {
     DmnDecisionResult result = dmnEngine.evaluateDecision(decisions.get(0), inputVariables);
     
     assertThat(result.getFirstResult()).containsEntry("Score", 0.9);
+  }
+  
+  @Test
+  public void testInputWithSpecialChars() {
+    File decisionTableFile = new File("src/test/resources/dmnPreparation/headers-with-special-chars.dmn");
+    DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
     
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(modelInstance);
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable();
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
+    Map<String, Object> inputVariables = new HashMap<String, Object>();
+    inputVariables.put("High_Load___1M_Workflow_Instances___Day_", true);
+    inputVariables.put("Only__Basic_Workflow_Execution__required_", true);
+    DmnDecisionResult result = dmnEngine.evaluateDecision(decisions.get(0), inputVariables);
+    
+    assertThat(result.getFirstResult()).containsEntry("Proposed_Camunda_product", "ZeeBe");
   }
   
 }

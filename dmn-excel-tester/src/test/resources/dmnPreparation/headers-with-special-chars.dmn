@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" id="definitions_1a3awah" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="Headers with special chars">
+    <decisionTable id="decisionTable">
+      <input id="input1" label="High Load (&#62;1M Workflow Instances / Day)">
+        <inputExpression id="inputExpression1" typeRef="boolean">        <text></text>
+</inputExpression>
+      </input>
+      <input id="InputClause_1ilo30t" label="Only &#34;Basic Workflow Execution&#34; required?">
+        <inputExpression id="LiteralExpression_1vxmhnh" typeRef="boolean" />
+      </input>
+      <output id="output1" label="Proposed Camunda product" name="" typeRef="string" />
+      <rule id="row-370103423-1">
+        <inputEntry id="UnaryTests_0h7w2m0">        <text>true</text>
+</inputEntry>
+        <inputEntry id="UnaryTests_1lnmnpb">        <text>true</text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0sq70u0">        <text><![CDATA["ZeeBe"]]></text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
