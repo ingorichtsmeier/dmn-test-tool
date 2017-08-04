@@ -82,6 +82,47 @@ public class ExcelSheetReaderTest {
   }
   
   @Test
+  public void testUserFriendlyBooleanValues() throws Docx4JException, Xlsx4jException {
+    File exceFile = new File("src/test/resources/excelPreparation/booleanValues.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(exceFile);
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    assertThat(dataFromExcel.get(2)).containsOnly(
+        entry("True", "true"), 
+        entry("False", "false"),
+        entry("Expected:_Result_1", Arrays.asList("true", "false")));
+  }
+  
+  @Test
+  public void testTranslateNull() {
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
+    assertThat(excelSheetReader.translateValue(null)).isNull();
+  }
+  
+  @Test
+  public void testTranslateYes() {
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
+    assertThat(excelSheetReader.translateValue("Yes")).isEqualTo("true");
+  }
+  
+  @Test
+  public void testTranslateNo() {
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
+    assertThat(excelSheetReader.translateValue("No")).isEqualTo("false");
+  }
+  
+  @Test
+  public void testTranslateJa() {
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
+    assertThat(excelSheetReader.translateValue("Ja")).isEqualTo("true");
+  }
+  
+  @Test
+  public void testTranslateNein() {
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
+    assertThat(excelSheetReader.translateValue("Nein")).isEqualTo("false");
+  }
+  
+  @Test
   public void testCoordinateGetterA1() {
     String cellCoordinates = "A1";
     Coordinates coordinates = new Coordinates(cellCoordinates);

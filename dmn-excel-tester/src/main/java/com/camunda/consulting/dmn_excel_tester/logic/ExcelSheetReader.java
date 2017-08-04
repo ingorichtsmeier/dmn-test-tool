@@ -94,13 +94,13 @@ public class ExcelSheetReader {
                 List<String> cellList = new ArrayList<String>();
                 while (stringTokenizer.hasMoreElements()) {
                   String cellElement = (String) stringTokenizer.nextElement();
-                  cellList.add(cellElement.trim());
+                  cellList.add(translateValue(cellElement.trim()));
                 }
                 rowContent.put(columnNameEscaped, cellList);
                 log.info("Fill key {} with list {}", columnNameEscaped, cellList);
               } else {
                 // it's just an ordinary string
-                rowContent.put(columnNameEscaped, cellValue);
+                rowContent.put(columnNameEscaped, translateValue(cellValue));
                 log.info("Fill key {} with content {}", columnNameEscaped, cellValue);
               }
             }
@@ -126,6 +126,24 @@ public class ExcelSheetReader {
 
     return resultList;
   }
+  
+  public String translateValue(String value) {
+    if (value != null) {
+      if ("yes".equals(value.toLowerCase())) {
+        return "true";
+      } else if ("no".equals(value.toLowerCase())) {
+        return "false";
+      } else if ("ja".equals(value.toLowerCase())) {
+        return "true";
+      } else if ("nein".equals(value.toLowerCase())){
+        return "false";
+      } else {
+        return value;
+      }
+    } else {
+      return value;
+    }
+  } 
   
   private void  printInfo(Part p, StringBuilder sb, String indent) {
     sb.append("\n" + indent + "Part " + p.getPartName() + " [" + p.getClass().getName() + "] " );   
