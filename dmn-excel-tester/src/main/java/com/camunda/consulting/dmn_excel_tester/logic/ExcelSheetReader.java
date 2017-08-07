@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.function.Function;
 
 import javax.xml.bind.JAXBElement;
 
@@ -94,13 +95,15 @@ public class ExcelSheetReader {
                 List<String> cellList = new ArrayList<String>();
                 while (stringTokenizer.hasMoreElements()) {
                   String cellElement = (String) stringTokenizer.nextElement();
-                  cellList.add(translateValue(cellElement.trim()));
+                  // TODO; try cellelement -> translateValue(cellelelemnt.trim())
+                  cellList.add(translateBoolean.apply(cellElement.trim()));
                 }
                 rowContent.put(columnNameEscaped, cellList);
                 log.info("Fill key {} with list {}", columnNameEscaped, cellList);
               } else {
                 // it's just an ordinary string
-                rowContent.put(columnNameEscaped, translateValue(cellValue));
+                //TODO: try cellvalue -> translateValue(cellValue);
+                rowContent.put(columnNameEscaped, translateBoolean.apply(cellValue));
                 log.info("Fill key {} with content {}", columnNameEscaped, cellValue);
               }
             }
@@ -126,24 +129,14 @@ public class ExcelSheetReader {
 
     return resultList;
   }
-  
-  public String translateValue(String value) {
+
+  public Function<String, String> translateBoolean = (String value) -> {
     if (value != null) {
-      if ("yes".equals(value.toLowerCase())) {
-        return "true";
-      } else if ("no".equals(value.toLowerCase())) {
-        return "false";
-      } else if ("ja".equals(value.toLowerCase())) {
-        return "true";
-      } else if ("nein".equals(value.toLowerCase())){
-        return "false";
-      } else {
-        return value;
-      }
-    } else {
-      return value;
-    }
-  } 
+      if (value.toLowerCase().equals("yes") || value.toLowerCase().equals("ja")) return "true"; 
+      if (value.toLowerCase().equals("no") || value.toLowerCase().equals("nein")) return "false";
+    } 
+    return value;
+  };
   
   private void  printInfo(Part p, StringBuilder sb, String indent) {
     sb.append("\n" + indent + "Part " + p.getPartName() + " [" + p.getClass().getName() + "] " );   

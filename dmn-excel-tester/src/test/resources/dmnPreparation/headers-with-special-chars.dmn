@@ -7,7 +7,8 @@
 </inputExpression>
       </input>
       <input id="InputClause_1ilo30t" label="Only &#34;Basic Workflow Execution&#34; required?">
-        <inputExpression id="LiteralExpression_1vxmhnh" typeRef="boolean" />
+        <inputExpression id="LiteralExpression_1vxmhnh" typeRef="boolean">        <text>basicWorkflow</text>
+</inputExpression>
       </input>
       <output id="output1" label="Proposed Camunda product" name="" typeRef="string" />
       <rule id="row-370103423-1">

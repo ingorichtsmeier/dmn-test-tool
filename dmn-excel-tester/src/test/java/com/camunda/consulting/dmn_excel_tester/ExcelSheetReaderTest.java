@@ -95,31 +95,37 @@ public class ExcelSheetReaderTest {
   @Test
   public void testTranslateNull() {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
-    assertThat(excelSheetReader.translateValue(null)).isNull();
+    assertThat(excelSheetReader.translateBoolean.apply(null)).isNull();
+  }
+  
+  @Test
+  public void testDontTranslate() {
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
+    assertThat(excelSheetReader.translateBoolean.apply("Do not translate")).isEqualTo("Do not translate");
   }
   
   @Test
   public void testTranslateYes() {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
-    assertThat(excelSheetReader.translateValue("Yes")).isEqualTo("true");
+    assertThat(excelSheetReader.translateBoolean.apply("Yes")).isEqualTo("true");
   }
   
   @Test
   public void testTranslateNo() {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
-    assertThat(excelSheetReader.translateValue("No")).isEqualTo("false");
+    assertThat(excelSheetReader.translateBoolean.apply("No")).isEqualTo("false");
   }
   
   @Test
   public void testTranslateJa() {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
-    assertThat(excelSheetReader.translateValue("Ja")).isEqualTo("true");
+    assertThat(excelSheetReader.translateBoolean.apply("Ja")).isEqualTo("true");
   }
   
   @Test
   public void testTranslateNein() {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(null);
-    assertThat(excelSheetReader.translateValue("Nein")).isEqualTo("false");
+    assertThat(excelSheetReader.translateBoolean.apply("Nein")).isEqualTo("false");
   }
   
   @Test

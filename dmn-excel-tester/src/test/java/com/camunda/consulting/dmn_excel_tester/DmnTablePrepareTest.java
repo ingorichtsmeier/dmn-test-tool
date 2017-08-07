@@ -5,23 +5,28 @@ import static org.assertj.core.api.Assertions.*;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
+import org.assertj.core.data.MapEntry;
 import org.camunda.bpm.dmn.engine.DmnDecision;
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
-import org.camunda.bpm.model.dmn.instance.InputExpression;
-import org.camunda.bpm.model.dmn.instance.Text;
+import org.camunda.bpm.model.dmn.instance.Input;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.camunda.consulting.dmn_excel_tester.functional.Tuple;
 import com.camunda.consulting.dmn_excel_tester.logic.DmnTablePreparer;
 
 public class DmnTablePrepareTest {
+  
+  private final Logger log = LoggerFactory.getLogger(DmnTablePrepareTest.class);
   
   @Test
   public void testDishTablePreparationEmpty() {
@@ -39,8 +44,8 @@ public class DmnTablePrepareTest {
     //    columnC.put("C", "Expected: Dish");
     //    headers.add(columnC);
     
-    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(modelInstance/*, headers*/);
-    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable();
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable(modelInstance)._1;
     
     DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
     List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
@@ -57,8 +62,8 @@ public class DmnTablePrepareTest {
     File decisionTableFile = new File("src/test/resources/dmnPreparation/dish-technical.dmn");   
     DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
     
-    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(modelInstance);
-    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable();
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable(modelInstance)._1;
     
     DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
     List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
@@ -75,8 +80,8 @@ public class DmnTablePrepareTest {
     File decisionTableFile = new File("src/test/resources/dmnPreparation/boolean-input.dmn");
     DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
     
-    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(modelInstance);
-    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable();
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable(modelInstance)._1;
     
     DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
     List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
@@ -92,8 +97,10 @@ public class DmnTablePrepareTest {
     File decisionTableFile = new File("src/test/resources/dmnPreparation/headers-with-special-chars.dmn");
     DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
     
-    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(modelInstance);
-    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable();
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable(modelInstance)._1;
+    
+    log.info("prepared table: {}", Dmn.convertToString(preparedModelInstance));
     
     DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
     List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
@@ -103,6 +110,52 @@ public class DmnTablePrepareTest {
     DmnDecisionResult result = dmnEngine.evaluateDecision(decisions.get(0), inputVariables);
     
     assertThat(result.getFirstResult()).containsEntry("Proposed_Camunda_product", "ZeeBe");
+  }
+  
+  @Test
+  public void testKeepInputExpression() {
+    assertThat(DmnTablePreparer.calculateHeader.apply("My Header", "inputExpression"))
+      .isEqualTo("inputExpression");
+  }
+  
+  @Test
+  public void testMapInputName() {
+    assertThat(DmnTablePreparer.calculateHeader.apply("My Header?", ""))
+      .isEqualTo("My_Header_");
+  }
+  
+  @Test
+  public void testTransformInputHeaders() {
+    File decisionTableFile = new File("src/test/resources/dmnPreparation/headers-with-special-chars.dmn");
+    DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
+    
+    Collection<Input> inputs = modelInstance.getModelElementsByType(Input.class);
+    inputs.forEach(DmnTablePreparer.transformInputHeaders);
+    Input[] inputArray = (Input[]) inputs.toArray(new Input[2]);
+    
+    assertThat(inputArray[0].getInputExpression().getTextContent()).isEqualTo("High_Load___1M_Workflow_Instances___Day_");
+    assertThat(inputArray[1].getInputExpression().getTextContent()).isEqualTo("basicWorkflow");
+  }
+  
+  @Test
+  public void testgetDmnTableHeaders() {
+    File decisionTableFile = new File("src/test/resources/dmnPreparation/headers-with-special-chars.dmn");
+    DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);
+    Tuple<DmnModelInstance, ConcurrentMap<String, String>> preparation = DmnTablePreparer.getDmnTableHeaders.apply(modelInstance);
+    DmnModelInstance preparedModelInstance = preparation._1;
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(preparedModelInstance);
+    Map<String, Object> inputVariables = new HashMap<String, Object>();
+    inputVariables.put("High_Load___1M_Workflow_Instances___Day_", true);
+    inputVariables.put("basicWorkflow", true);
+    DmnDecisionResult result = dmnEngine.evaluateDecision(decisions.get(0), inputVariables);
+    
+    assertThat(result.getFirstResult()).containsEntry("Proposed_Camunda_product", "ZeeBe");
+    
+    assertThat(preparation._2).contains(MapEntry.entry("High Load (>1M Workflow Instances / Day)", "High_Load___1M_Workflow_Instances___Day_"), 
+        MapEntry.entry("Only \"Basic Workflow Execution\" required?", "basicWorkflow"),
+        MapEntry.entry("Proposed Camunda product", "Proposed_Camunda_product"));
   }
   
 }

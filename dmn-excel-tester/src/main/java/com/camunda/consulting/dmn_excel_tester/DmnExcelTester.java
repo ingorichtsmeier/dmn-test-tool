@@ -100,8 +100,8 @@ public class DmnExcelTester extends Application {
   public List<Map<String, Object>> readAndEvaluateDecsions(String excelSheetFilename, String dmnFileName) throws Docx4JException, Xlsx4jException {
     File dmnTableFile = new File(dmnFileName);
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
-    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer(dmnModelInstance);
-    DmnModelInstance preparedTable = dmnTablePreparer.prepareTable();
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    DmnModelInstance preparedTable = dmnTablePreparer.prepareTable(dmnModelInstance)._1;
     
     // open the excel file
     File excelFile = new File(excelSheetFilename);
