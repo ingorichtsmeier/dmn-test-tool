@@ -22,7 +22,7 @@ public class ExcelSheetReaderTest {
   public void testReadExcelSheet() throws Docx4JException, Xlsx4jException {
     File excelFile = new File("src/test/resources/dish-3Expected.xlsx");   
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     
     assertThat(dataFromExcel).hasSize(3 + 1); // index 0 not used
     assertThat(dataFromExcel.get(1)).containsOnly(
@@ -39,7 +39,7 @@ public class ExcelSheetReaderTest {
   public void testReadExcelSheet03Formula() throws Docx4JException, Xlsx4jException {
     File ecxelFile = new File("src/test/resources/03-Formulas-and-functionsExpected.xlsx");   
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(ecxelFile);    
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     
     assertThat(dataFromExcel.get(2)).containsOnly(
         entry("Season", "Spring"), 
@@ -53,7 +53,7 @@ public class ExcelSheetReaderTest {
   public void testReadExcelSheetCollectHitPolicy() throws Docx4JException, Xlsx4jException {
     File excelFile = new File("src/test/resources/collect/beveragesExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     assertThat(dataFromExcel.get(2)).containsOnly(
         entry("Dish", "Spareribs"),
         entry("Guests_with_Children", "true"),
@@ -64,7 +64,7 @@ public class ExcelSheetReaderTest {
   public void testReadExcelSheetBooleanInputWithQuestionMark() throws Docx4JException, Xlsx4jException {
     File excelFile = new File("src/test/resources/dmnPreparation/boolean-inputExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     assertThat(dataFromExcel.get(2)).containsOnly(
         entry("Claim_region_identical_", "true"),
         entry("Expected:_Score", "0.9"));
@@ -74,7 +74,7 @@ public class ExcelSheetReaderTest {
   public void testReadExcelSheetHeadersWithSpecialChars() throws Docx4JException, Xlsx4jException {
     File excelFile = new File("src/test/resources/dmnPreparation/headers-with-special-charsExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     assertThat(dataFromExcel.get(2)).containsOnly(
         entry("High_Load___1M_Workflow_Instances___Day_", "true"),
         entry("Only__Basic_Workflow_Execution__required_", "true"),
@@ -82,10 +82,27 @@ public class ExcelSheetReaderTest {
   }
   
   @Test
+  public void testReadExcelSheetDRDDinnerDecisions() throws Docx4JException, Xlsx4jException {
+    File excelFile = new File("src/test/resources/drd/dinnerDecisionsExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    assertThat(dataFromExcel).containsOnlyKeys("Beverages", "Dish");
+    assertThat(dataFromExcel.get("Beverages").get(2)).containsOnly(
+        entry("Season", "Spring"),
+        entry("Number_of_Guests", "5"), 
+        entry("Guests_with_children", "true"),
+        entry("Expected:_Beverages", Arrays.asList("Pinot Noir", "Apple Juice", "Water")));
+    assertThat(dataFromExcel.get("Dish").get(2)).containsOnly(
+        entry("Season", "Spring"), 
+        entry("Number_of_Guests", "5"), 
+        entry("Expected:_Dish", "Steak"));
+  }
+  
+  @Test
   public void testUserFriendlyBooleanValues() throws Docx4JException, Xlsx4jException {
     File exceFile = new File("src/test/resources/excelPreparation/booleanValues.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(exceFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     assertThat(dataFromExcel.get(2)).containsOnly(
         entry("True", "true"), 
         entry("False", "false"),

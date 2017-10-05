@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 
@@ -17,6 +18,7 @@ import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.JaxbXmlPart;
 import org.docx4j.openpackaging.parts.Part;
 import org.docx4j.openpackaging.parts.SpreadsheetML.SharedStrings;
+import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
@@ -26,8 +28,8 @@ import org.xlsx4j.exceptions.Xlsx4jException;
 import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.STCellType;
+import org.xlsx4j.sml.Sheet;
 import org.xlsx4j.sml.SheetData;
-import org.xlsx4j.sml.Worksheet;
 
 import com.camunda.consulting.dmn_excel_tester.data.Coordinates;
 
@@ -37,10 +39,12 @@ public class ExcelSheetReader {
   
   private File excelFile;
   
-  private List<WorksheetPart> worksheets = new ArrayList<WorksheetPart>();
+  private Map<String, WorksheetPart> worksheetMap = new HashMap<String, WorksheetPart>();
   
   private SharedStrings sharedStrings = null;
   
+  private Map<String, Sheet> sheetMap = new HashMap<String, Sheet>();
+
   private HashMap<Part, Part> handled = new HashMap<Part, Part>();
   
   private final HashMap<String, Object> emptyRow = new HashMap<String, Object>();
@@ -49,24 +53,29 @@ public class ExcelSheetReader {
     this.excelFile = excelFile; 
   }
   
-  public List<Map<String, Object>> getDataFromExcel() throws Docx4JException, Xlsx4jException {    
+  public Map<String, List<Map<String, Object>>> getDataFromExcel() throws Docx4JException, Xlsx4jException {    
     OpcPackage spreadSheetPackage = (OpcPackage) SpreadsheetMLPackage.load(excelFile);
     
     // List the parts by walking the rels tree
     RelationshipsPart rp = spreadSheetPackage.getRelationshipsPart();
     StringBuilder sb = new StringBuilder();
-    printInfo(rp, sb, "");
+    printInfo("root", rp, sb, "");
     traverseRelationships(spreadSheetPackage, rp, sb, "    ");
     
     log.info("StringBuilder: {}", sb.toString());
     
-    ArrayList<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-    resultList.add(emptyRow); // first element at index 0
-        
-    for(WorksheetPart sheet: worksheets) {
-      log.info("part name: {}", sheet.getPartName().getName() );
-      Worksheet ws = sheet.getJaxbElement();
-      SheetData data = ws.getSheetData();
+    Map<String, List<Map<String, Object>>> dataMap = new HashMap<String, List<Map<String, Object>>>();
+    
+    for (Entry<String, WorksheetPart> entry : worksheetMap.entrySet()) {
+      ArrayList<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
+      resultList.add(emptyRow); // first element at index 0
+      
+      WorksheetPart sheet = entry.getValue();
+      log.info("part relationshipId {}, sheetname: {}, relationshipName: {}", 
+          entry.getKey(),
+          sheetMap.get(entry.getKey()).getName(),
+          sheet.getPartName().getName() );
+      SheetData data = sheet.getContents().getSheetData();
       HashMap<String, Object> headerContent = new HashMap<String, Object>();
       
       for (Row row : data.getRow()) {
@@ -78,7 +87,7 @@ public class ExcelSheetReader {
         for (Cell cell : cells) {
           Coordinates coordinates = new Coordinates(cell.getR());
           if (cell.getT().equals(STCellType.S)) {
-            String cellValue = sharedStrings.getJaxbElement().getSi().get(Integer.parseInt(cell.getV())).getT().getValue();
+            String cellValue = sharedStrings.getContents().getSi().get(Integer.parseInt(cell.getV())).getT().getValue();
             log.info("  {} (S) contains {}", cell.getR(), cellValue);
             // cell.getR() contains coordinates A1, B2 or C3 (Column, Row)
             if (rowIndex.equals(1L)) {
@@ -125,9 +134,10 @@ public class ExcelSheetReader {
         }
       }
       resultList.set(1, headerContent);
+      dataMap.put(sheetMap.get(entry.getKey()).getName(), resultList);
     }
 
-    return resultList;
+    return dataMap;
   }
 
   public Function<String, String> translateBoolean = (String value) -> {
@@ -137,27 +147,43 @@ public class ExcelSheetReader {
     } 
     return value;
   };
-  
-  private void  printInfo(Part p, StringBuilder sb, String indent) {
-    sb.append("\n" + indent + "Part " + p.getPartName() + " [" + p.getClass().getName() + "] " );   
+
+  /**
+   * Get worksheets, sharedStrings and sheets from the Spreadsheet.
+   * 
+   * @param p 
+   * @param sb Stringbuilder to debug the structure
+   * @param indent 
+   * @throws Docx4JException 
+   */
+  private void  printInfo(String relationshipId, Part p, StringBuilder sb, String indent) throws Docx4JException {
+    sb.append("\n" + indent + relationshipId + ": Part " + p.getPartName() + " [" + p.getClass().getName() + "] " );   
     if (p instanceof JaxbXmlPart) {
       Object o = ((JaxbXmlPart)p).getJaxbElement();
       if (o instanceof JAXBElement) {
-        sb.append(" containing JaxbElement:" + XmlUtils.JAXBElementDebug((JAXBElement)o) );
+        sb.append(" containing debugged JaxbElement:" + XmlUtils.JAXBElementDebug((JAXBElement)o) );
       } else {
         sb.append(" containing JaxbElement:"  + o.getClass().getName() );
       }
     }
     if (p instanceof WorksheetPart) {
-      worksheets.add((WorksheetPart)p);
+      worksheetMap.put(relationshipId, (WorksheetPart)p);
     } else if (p instanceof SharedStrings) {
       sharedStrings = (SharedStrings)p;
+    } else if (p instanceof WorkbookPart) {
+      log.info("Handling WorkbookPart {}", p.getPartName());
+      WorkbookPart wbp = (WorkbookPart) p;
+      List<Sheet> sheetList = wbp.getContents().getSheets().getSheet();
+      for (Sheet sheet : sheetList) {
+        log.info("Sheet id: {}, name: {}, sheetId: {}", sheet.getId(), sheet.getName(), sheet.getSheetId());
+        sheetMap.put(sheet.getId(), sheet);
+      }
     }
   }
   
   private void traverseRelationships(org.docx4j.openpackaging.packages.OpcPackage wordMLPackage, 
       RelationshipsPart rp, 
-      StringBuilder sb, String indent) {
+      StringBuilder sb, String indent) throws Docx4JException {
     
     // TODO: order by rel id
     
@@ -176,7 +202,7 @@ public class ExcelSheetReader {
       
       Part part = rp.getPart(r);
           
-      printInfo(part, sb, indent);
+      printInfo(r.getId(), part, sb, indent);
       if (handled.get(part)!=null) {
         sb.append(" [additional reference] ");
         continue;

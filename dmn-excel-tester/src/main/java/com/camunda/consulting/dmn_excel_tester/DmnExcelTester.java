@@ -108,7 +108,7 @@ public class DmnExcelTester extends Application {
     
     // read the sheet
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().values().iterator().next();
     
     // validate the excel to decision
     ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, preparedTable);

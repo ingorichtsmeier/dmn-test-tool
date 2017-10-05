@@ -45,7 +45,7 @@ public class ExcelDmnValidatorTest {
   public List<Map<String, Object>> readExcelFile(String fileName) throws Docx4JException, Xlsx4jException {
     File excelFile = new File(fileName);
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);    
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
     return dataFromExcel;
   }
 
