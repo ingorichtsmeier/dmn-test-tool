@@ -108,7 +108,7 @@ public class DmnExcelTester extends Application {
     
     // read the sheet
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().values().iterator().next();
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     // validate the excel to decision
     ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, preparedTable);
@@ -122,7 +122,7 @@ public class DmnExcelTester extends Application {
       expectationsMismatches.add(validatonErrorMessage);
     } else {    
       // evaluate the decisions with values from the excel sheet
-      DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel);
+      DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel.values().iterator().next());
       expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
     }
     return expectationsMismatches;
