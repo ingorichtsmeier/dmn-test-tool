@@ -82,18 +82,24 @@ public class ExpectationMapper {
       } else {
         // hitpolicy single result
         
-        // iterate over all result entries to match all expectations
-        for (Iterator<DmnDecisionResultEntries> iterator = result.iterator(); iterator.hasNext();) {
-          DmnDecisionResultEntries dmnDecisionResultEntries = (DmnDecisionResultEntries) iterator.next();
-          log.info("iteration of result with {} and key {}", dmnDecisionResultEntries, key);
-          
-          // Convert the decision result to String as all cellValues from Excel are Strings
-          String entryStr = dmnDecisionResultEntries.getEntry(key).toString();
-          if (expectedResultData.get(key).equals(entryStr)) {
-            log.info("Expected result for key {}: {} is found in result {}", key, expectedResultData.get(key), entryStr);
-          } else {
-            log.info("Expected result for key {}: {} is not found in result {}", key, expectedResultData.get(key), entryStr);
-            unexpectedResults.put(key, new EvaluatedResult(expectedResultData.get(key), entryStr));
+        if (result.isEmpty()) {
+          log.info("result is empty: No rule applied");
+          unexpectedResults.put("Error", "No rule applied\n");
+        } else {
+          // iterate over all result entries to match all expectations
+          for (Iterator<DmnDecisionResultEntries> iterator = result.iterator(); iterator.hasNext();) {
+            DmnDecisionResultEntries dmnDecisionResultEntries = (DmnDecisionResultEntries) iterator.next();
+            log.info("iteration of result with {} and key {}", dmnDecisionResultEntries, key);
+
+            // Convert the decision result to String as all cellValues from
+            // Excel are Strings
+            String entryStr = dmnDecisionResultEntries.getEntry(key).toString();
+            if (expectedResultData.get(key).equals(entryStr)) {
+              log.info("Expected result for key {}: {} is found in result {}", key, expectedResultData.get(key), entryStr);
+            } else {
+              log.info("Expected result for key {}: {} is not found in result {}", key, expectedResultData.get(key), entryStr);
+              unexpectedResults.put(key, new EvaluatedResult(expectedResultData.get(key), entryStr));
+            }
           }
         }
       }

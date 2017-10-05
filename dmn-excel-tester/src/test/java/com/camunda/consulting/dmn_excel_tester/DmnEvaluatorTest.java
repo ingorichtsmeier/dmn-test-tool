@@ -22,6 +22,7 @@ import org.xlsx4j.exceptions.Xlsx4jException;
 
 import com.camunda.consulting.dmn_excel_tester.data.EvaluatedResult;
 import com.camunda.consulting.dmn_excel_tester.logic.DmnEvaluator;
+import com.camunda.consulting.dmn_excel_tester.logic.ExcelDmnValidator;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelSheetReader;
 import com.camunda.consulting.dmn_excel_tester.logic.ExpectationMapper;
 
@@ -259,4 +260,41 @@ public class DmnEvaluatorTest {
     assertThat(expectationResult.get(2)).containsEntry("Score", new EvaluatedResult("-6", "-5"));
     assertThat(expectationResult.get(3)).isEmpty();
   }
+  
+  @Test
+  public void testNoMatchingRuleResult() {
+    HashMap<String, Object> expectedResult = new HashMap<String, Object>();
+    expectedResult.put("Output", "would not match");
+    
+    DmnDecisionResult emptyDecisionResult = evaluateNoMatchingRuleDmn();
+    ExpectationMapper expectationMapper = new ExpectationMapper();
+    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, emptyDecisionResult, HitPolicy.UNIQUE, null);
+    assertThat(unexpectedResults).containsEntry("Error", "No rule applied\n");    
+  }
+
+  private DmnDecisionResult evaluateNoMatchingRuleDmn() {
+    HashMap<String, Object> decisionInput = new HashMap<String, Object>();
+    decisionInput.put("Input", "a");
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(Dmn.readModelFromFile(new File("src/test/resources/noMatchingRule/noMatchingRule.dmn")));
+    DmnDecisionResult emptyDecisionResult = dmnEngine.evaluateDecision(decisions.get(0), decisionInput);
+    return emptyDecisionResult;
+  }
+  
+  @Test
+  public void testNoMatchingRule() throws Docx4JException, Xlsx4jException {
+    File dmnTableFile = new File("src/test/resources/noMatchingRule/noMatchingRule.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
+    
+    File excelFile = new File("src/test/resources/noMatchingRule/noMatchingRuleExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    List<Map<String, Object>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    
+    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
+    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult).hasSize(3);
+    assertThat(expectationResult.get(2)).containsEntry("Error", "No rule applied\n");
+  }
+  
+
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="definitions_1j2l3gl" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="No matching rule">
+    <decisionTable id="decisionTable">
+      <input id="input1" label="Input" camunda:inputVariable="">
+        <inputExpression id="inputExpression1" typeRef="string">        <text>Input</text>
+</inputExpression>
+      </input>
+      <output id="output1" label="Output" name="Output" typeRef="string" />
+      <rule id="row-293865795-4">
+        <inputEntry id="UnaryTests_1gzewe6">        <text><![CDATA["b"]]></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0ow5h4r">        <text><![CDATA["fits the test"]]></text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
