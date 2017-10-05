@@ -24,12 +24,12 @@ public class DmnEvaluator {
   private static final Logger log = LoggerFactory.getLogger(DmnEvaluator.class);
   
   private DmnModelInstance decisionModel;
-  private List<Map<String, Object>> testData;
+  private Map<String, List<Map<String, Object>>> testData;
   private DmnEngine dmnEngine;
 
   private ExpectationMapper expectationMapper;
 
-  public DmnEvaluator(DmnModelInstance decisionModel, List<Map<String, Object>> dataFromExcel) {
+  public DmnEvaluator(DmnModelInstance decisionModel, Map<String, List<Map<String, Object>>> dataFromExcel) {
     this.decisionModel = decisionModel;
     this.testData = dataFromExcel;
     this.dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
@@ -57,9 +57,14 @@ public class DmnEvaluator {
         builtinAggregator = decisionTable.getHitPolicyHandler().getHitPolicyEntry().getAggregator();
       };
       log.info("HitPolicy: {}", hitPolicy);
-      for (int i = 2; i < testData.size(); i++) {
-        Map<String, Object> decisionData = testData.get(i);
-        Map<String, Object> expectedResultData = expectationMapper.getExpectationData(testData.get(i));
+      List<Map<String, Object>> sheetData = testData.get(dmnDecision.getName());
+      // TODO: Only one sheet with default name, mostly 'Tabelle1'
+      if (sheetData == null) {
+        sheetData = testData.entrySet().iterator().next().getValue();
+      }
+      for (int i = 2; i < sheetData.size(); i++) {
+        Map<String, Object> decisionData = sheetData.get(i);
+        Map<String, Object> expectedResultData = expectationMapper.getExpectationData(sheetData.get(i));
         try {
           DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
           log.info("Result: {}", result);

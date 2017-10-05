@@ -6,13 +6,14 @@
     </extensionElements>
     <decisionTable id="decisionTable">
       <input id="input1" label="Season" camunda:inputVariable="">
-        <inputExpression id="inputExpression1" typeRef="string">        <text>input1</text>
+        <inputExpression id="inputExpression1" typeRef="string">        <text>Season</text>
 </inputExpression>
       </input>
-      <input id="InputClause_0bg5o91" label="Number of Guests">
-        <inputExpression id="LiteralExpression_17mm4i2" typeRef="integer" />
+      <input id="InputClause_0bg5o91" label="Number of Guests" camunda:inputVariable="">
+        <inputExpression id="LiteralExpression_17mm4i2" typeRef="integer">        <text>Number_of_Guests</text>
+</inputExpression>
       </input>
-      <output id="output1" label="Dish" name="desiredDish" typeRef="string" />
+      <output id="output1" label="Dish" name="Dish" typeRef="string" />
       <rule id="row-398815966-1">
         <inputEntry id="UnaryTests_18ag83a">        <text><![CDATA["Fall"]]></text>
 </inputEntry>
@@ -76,14 +77,14 @@
     </informationRequirement>
     <decisionTable id="DecisionTable_1ymabui" hitPolicy="COLLECT">
       <input id="InputClause_1ajuq4l" label="Dish" camunda:inputVariable="">
-        <inputExpression id="LiteralExpression_1xjqxhu" typeRef="string">        <text>desiredDish</text>
+        <inputExpression id="LiteralExpression_1xjqxhu" typeRef="string">        <text>Dish</text>
 </inputExpression>
       </input>
       <input id="InputClause_0hdqtmq" label="Guests with children" camunda:inputVariable="">
-        <inputExpression id="LiteralExpression_03r39yd" typeRef="boolean">        <text>guestsWithChildren</text>
+        <inputExpression id="LiteralExpression_03r39yd" typeRef="boolean">        <text>Guests_with_children</text>
 </inputExpression>
       </input>
-      <output id="OutputClause_15ncy58" label="Beverages" name="beverages" typeRef="string" />
+      <output id="OutputClause_15ncy58" label="Beverages" name="Beverages" typeRef="string" />
       <rule id="row-398815966-7">
         <inputEntry id="UnaryTests_03zuv6e">        <text><![CDATA["Spareribs"]]></text>
 </inputEntry>

@@ -122,7 +122,7 @@ public class DmnExcelTester extends Application {
       expectationsMismatches.add(validatonErrorMessage);
     } else {    
       // evaluate the decisions with values from the excel sheet
-      DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel.values().iterator().next());
+      DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel);
       expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
     }
     return expectationsMismatches;

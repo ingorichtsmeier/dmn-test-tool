@@ -34,7 +34,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/dish-3Expected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
@@ -50,7 +50,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/dish-and-drinkExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
@@ -66,7 +66,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/unexpected/dish-and-drink-failsExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
@@ -85,7 +85,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/03-Formulas-and-functionsExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> expectationResults = dmnEvaluator.evaluateAllExpectations();
@@ -157,7 +157,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/hitPolicy/determine-employee-1Expected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> decisionResults = dmnEvaluator.evaluateAllExpectations();
@@ -216,7 +216,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/collect/beveragesExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String,Object>> expectations = dmnEvaluator.evaluateAllExpectations();
@@ -251,7 +251,7 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/collect/scoring-failsExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String,Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
@@ -287,11 +287,25 @@ public class DmnEvaluatorTest {
     
     File excelFile = new File("src/test/resources/noMatchingRule/noMatchingRuleExpected.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
-    List<Map<String, Object>> dataFromExcel = excelSheetReader.getDataFromExcel().get("Tabelle1");
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
     List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
     assertThat(expectationResult).hasSize(3);
     assertThat(expectationResult.get(2)).containsEntry("Error", "No rule applied\n");
+  }
+  
+  @Test
+  public void testDRDBeverages() throws Docx4JException, Xlsx4jException {
+    File drdFile = new File("src/test/resources/drd/dinnerDecisions.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(drdFile);
+    
+    File excelFile = new File("src/test/resources/drd/dinnerDecisionsExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    
+    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
+    List<Map<String,Object>> expectations = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectations).hasSize(5);
   }
 }
