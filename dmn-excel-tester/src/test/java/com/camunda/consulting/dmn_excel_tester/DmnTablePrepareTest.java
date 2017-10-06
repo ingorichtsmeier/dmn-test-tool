@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.assertj.core.data.MapEntry;
 import org.camunda.bpm.dmn.engine.DmnDecision;
+import org.camunda.bpm.dmn.engine.DmnDecisionRequirementsGraph;
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
@@ -110,6 +111,35 @@ public class DmnTablePrepareTest {
     DmnDecisionResult result = dmnEngine.evaluateDecision(decisions.get(0), inputVariables);
     
     assertThat(result.getFirstResult()).containsEntry("Proposed_Camunda_product", "ZeeBe");
+  }
+  
+  @Test
+  public void testDRDBusinessView() {
+    File drdFile = new File("src/test/resources/dmnPreparation/dinnerDecisionsBusinessView.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(drdFile);
+    
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    DmnModelInstance preparedModelInstance = dmnTablePreparer.prepareTable(dmnModelInstance)._1;
+    
+    log.info("prepared table: {}", Dmn.convertToString(preparedModelInstance));
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    DmnDecisionRequirementsGraph decisionRequirementsGraph = dmnEngine.parseDecisionRequirementsGraph(preparedModelInstance);
+    Collection<DmnDecision> decisions = decisionRequirementsGraph.getDecisions();
+    DmnDecision testDecision = null;
+    for (DmnDecision dmnDecision : decisions) {
+      if (dmnDecision.getName().equals("Beverages")) {
+        testDecision = dmnDecision;
+      }
+    }
+    
+    HashMap<String, Object> variables = new HashMap<String, Object>();
+    variables.put("Season", "Spring");
+    variables.put("Number_of_Guests", 5);
+    variables.put("Guests_with_children", true);
+    DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(testDecision, variables);
+    
+    assertThat(decisionResult.getFirstResult()).containsKey("Beverages");
   }
   
   @Test
