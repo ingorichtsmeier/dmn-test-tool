@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
@@ -57,6 +58,7 @@ public class DmnExcelTester extends Application {
   private static final Font helveticaBold18 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.BOLD, 18);
   private static final Font helvetica21 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.NORMAL, 21);
   private static final Font helvetica14 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.NORMAL, 14);
+  private static final Font helveticaBold14 = Font.font("Helvetica Neue,Helvetica,Arial,sans-serif", FontWeight.BOLD, 14);
 
   private static final Logger log = LoggerFactory.getLogger(DmnExcelTester.class);
   
@@ -90,14 +92,14 @@ public class DmnExcelTester extends Application {
     System.out.println(MessageFormat.format("Test of DMN table ''{0}''\nwith values from Excel sheet ''{1}''\n", dmnFileName, excelSheetFilename));
     System.out.println("Version: " + getClass().getPackage().getImplementationVersion());
     
-    List<Map<String, Object>> expectationsMismatches = readAndEvaluateDecsions(excelSheetFilename, dmnFileName);
+    Map<String, List<Map<String, Object>>> expectationsMismatches = readAndEvaluateDecsions(excelSheetFilename, dmnFileName);
     
     System.out.println("Results:");
     System.out.println(formatResultsForGui(expectationsMismatches));
     // save the results in a new tab and mark the results 'green' or 'red'
   }
 
-  public List<Map<String, Object>> readAndEvaluateDecsions(String excelSheetFilename, String dmnFileName) throws Docx4JException, Xlsx4jException {
+  public Map<String, List<Map<String, Object>>> readAndEvaluateDecsions(String excelSheetFilename, String dmnFileName) throws Docx4JException, Xlsx4jException {
     File dmnTableFile = new File(dmnFileName);
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
     DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
@@ -112,54 +114,63 @@ public class DmnExcelTester extends Application {
     
     // validate the excel to decision
     ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, preparedTable);
-    List<Map<String,Object>> expectationsMismatches = new ArrayList<Map<String, Object>>();
+    List<Map<String, Object>> tableMismatches = new ArrayList<Map<String, Object>>();
     List<String> validationResult = excelDmnValidator.validateMatchingExcelAndDmnModel();
     if (validationResult.size() > 0) {
-      expectationsMismatches.add(new HashMap<>());
+      tableMismatches.add(new HashMap<>());
       HashMap<String, Object> validatonErrorMessage = new HashMap<>();
       validatonErrorMessage.put("error:", "Excelsheet doesn't fit to the dmn table: ");
       validatonErrorMessage.put("details:", validationResult.toString());
-      expectationsMismatches.add(validatonErrorMessage);
+      tableMismatches.add(validatonErrorMessage);
+      Map<String,List<Map<String,Object>>> validationErrorMap = new HashMap<String, List<Map<String, Object>>>();
+      validationErrorMap.put("don't know which table", tableMismatches);
+      return validationErrorMap;
     } else {    
       // evaluate the decisions with values from the excel sheet
       DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel);
-      expectationsMismatches = dmnEvaluator.evaluateAllExpectations();
+      return dmnEvaluator.evaluateAllExpectations();
     }
-    return expectationsMismatches;
   }
 
-  public List<Text> formatResultsForGui(List<Map<String, Object>> expectationsMismatches) {
+  public List<Text> formatResultsForGui(Map<String, List<Map<String, Object>>> expectationsMismatches) {
+    expectationsMismatches.entrySet();
     List<Text> result = new ArrayList<Text>();
-    int i = 0;
-    for (Map<String, Object> mismatchLine : expectationsMismatches) {
-      if (i != 0) {
-        if (mismatchLine.isEmpty()) {
-          Text correctLine = new Text(MessageFormat.format("Line {0}: correct \n\n", i));
-          correctLine.setFill(Color.GREEN);
-          correctLine.setFont(helvetica14);
-          result.add(correctLine);
-        } else {
-          StringBuilder errorLineBuilder = new StringBuilder();
-          errorLineBuilder.append(MessageFormat.format("Line {0} with errors:\n", i));
-          for (String key : mismatchLine.keySet()) {
-            if (mismatchLine.get(key) instanceof EvaluatedResult) {
-              EvaluatedResult evaluatedResult = (EvaluatedResult)mismatchLine.get(key);
-              errorLineBuilder.append(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''\n", 
-                  key, 
-                  evaluatedResult.getExpected(), 
-                  evaluatedResult.getResult()));
-            } else if (mismatchLine.get(key) instanceof String) {
-              errorLineBuilder.append(mismatchLine.get(key));
+    for (Entry<String, List<Map<String, Object>>> expectationListEntry : expectationsMismatches.entrySet()) {
+
+      Text tableHeader = new Text(MessageFormat.format("Evaluation of table ''{0}''\n", expectationListEntry.getKey()));
+      tableHeader.setFont(helveticaBold14);
+      result.add(tableHeader);
+      int i = 0;
+      for (Map<String, Object> mismatchLine : expectationListEntry.getValue()) {
+        if (i != 0) {
+          if (mismatchLine.isEmpty()) {
+            Text correctLine = new Text(MessageFormat.format("Line {0}: correct \n\n", i));
+            correctLine.setFill(Color.GREEN);
+            correctLine.setFont(helvetica14);
+            result.add(correctLine);
+          } else {
+            StringBuilder errorLineBuilder = new StringBuilder();
+            errorLineBuilder.append(MessageFormat.format("Line {0} with errors:\n", i));
+            for (String key : mismatchLine.keySet()) {
+              if (mismatchLine.get(key) instanceof EvaluatedResult) {
+                EvaluatedResult evaluatedResult = (EvaluatedResult)mismatchLine.get(key);
+                errorLineBuilder.append(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''\n", 
+                    key, 
+                    evaluatedResult.getExpected(), 
+                    evaluatedResult.getResult()));
+              } else if (mismatchLine.get(key) instanceof String) {
+                errorLineBuilder.append(mismatchLine.get(key));
+              }
             }
+            errorLineBuilder.append('\n');
+            Text errorLine = new Text(errorLineBuilder.toString());
+            errorLine.setFill(Color.RED);
+            errorLine.setFont(helvetica14);
+            result.add(errorLine);
           }
-          errorLineBuilder.append('\n');
-          Text errorLine = new Text(errorLineBuilder.toString());
-          errorLine.setFill(Color.RED);
-          errorLine.setFont(helvetica14);
-          result.add(errorLine);
         }
+        i++;
       }
-      i++;
     }
     return result;
   }

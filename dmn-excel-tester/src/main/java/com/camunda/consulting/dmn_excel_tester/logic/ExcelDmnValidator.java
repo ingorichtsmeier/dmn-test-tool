@@ -35,13 +35,20 @@ public class ExcelDmnValidator {
   
   public List<String> validateMatchingExcelAndDmnModel() {
     List<String> errorResultList = new ArrayList<String>();
+    
+    String sheetsAndTablesValidationError = validateMatchingSheetsAndTables(dataFromExcel, dmnModelInstance);
+    if (sheetsAndTablesValidationError.isEmpty() == false) {
+      errorResultList.add(sheetsAndTablesValidationError);
+      return errorResultList;
+    }
       
-    for (Entry<String, List<Map<String, Object>>> sheetData : dataFromExcel.entrySet()) {
-      List<String> dmnInputHeaderLabels = new ArrayList<String>();
-      Collection<Decision> decisionList = dmnModelInstance.getModelElementsByType(Decision.class);
-      for (Decision decision : decisionList) {
-        log.info("decision name: {}", decision.getName());
-        decisionMap.put(decision.getId(), decision);
+    Collection<Decision> decisionList = dmnModelInstance.getModelElementsByType(Decision.class);
+    for (Decision decision : decisionList) {
+      log.info("decision name: {}", decision.getName());
+      decisionMap.put(decision.getId(), decision);
+      for (Entry<String, List<Map<String, Object>>> sheetData : dataFromExcel.entrySet()) {
+        List<String> dmnInputHeaderLabels = new ArrayList<String>();
+        
         if (decision.getName().equals(sheetData.getKey()) || decisionList.size() == 1) {
           DecisionTable decisionTable = decision.getChildElementsByType(DecisionTable.class).iterator().next();
           dmnInputHeaderLabels = collectInputHeaderLabels(decisionTable, dmnInputHeaderLabels);
@@ -98,23 +105,76 @@ public class ExcelDmnValidator {
     }
     return errorResultList;
   }
+  
+  public String validateMatchingSheetsAndTables(Map<String, List<Map<String, Object>>> dataFromExcel, DmnModelInstance dmnModelInstance) {
+    Collection<Decision> decisions = dmnModelInstance.getModelElementsByType(Decision.class);
+    ArrayList<String> decisionNames = new ArrayList<String>();
+    decisions.forEach(decision -> decisionNames.add(decision.getName()));
+    ArrayList<String> sheetNames = new ArrayList<String>();
+    dataFromExcel.keySet().forEach(sheetName -> sheetNames.add(sheetName));
+    if (decisionNames.size() == 1 && sheetNames.size() == 1) {
+      return "";
+    } else  {
+      return checkMatchingSheetAndTableNames(sheetNames, decisionNames);
+    } 
+  }
+
+  public String checkMatchingSheetAndTableNames(List<String> sheetNames, List<String> decisionNames) {
+    StringBuilder result = new StringBuilder();
+    
+    List<String> missingDecisionList = new ArrayList<String>();
+    decisionNames.forEach(decisionName -> missingDecisionList.add(decisionName));
+    
+    List<String> unmatchedSheets = new ArrayList<String>();
+    log.info("initial missing table names: {}", missingDecisionList);
+    sheetNames.forEach(sheetName -> {
+      if (decisionNames.contains(sheetName)) {
+        missingDecisionList.remove(sheetName);
+        log.info("removed {}", sheetName);
+      } else { 
+        unmatchedSheets.add(sheetName);
+      }
+    });
+    if (unmatchedSheets.size() > 0) {
+      result.append("Excel sheet");
+      if (unmatchedSheets.size() > 1) {
+        result.append("s ");
+      } else {
+        result.append(" ");
+      }
+      result.append(MessageFormat.format("''{0}''", unmatchedSheets.get(0)));
+      unmatchedSheets
+        .stream()
+        .skip(1)
+        .forEach(unmatchSheet -> {
+          result.append(MessageFormat.format(" and ''{0}''", unmatchSheet));
+        });
+      result.append(" didn't match decisions ");
+      result.append(MessageFormat.format("''{0}''", missingDecisionList.get(0)));
+      missingDecisionList
+        .stream()
+        .skip(1)
+        .forEach(missingTableName -> {
+          result.append(MessageFormat.format(" or ''{0}''", missingTableName)); 
+        }); 
+    }
+    return result.toString();
+  }
 
   private List<String> collectInputHeaderLabels(DecisionTable decisionTable, List<String> dmnInputHeaderLabels) {
     Collection<Input> dmnInputHeaders = decisionTable.getChildElementsByType(Input.class);
-    for (Iterator<Input> iterator = dmnInputHeaders.iterator(); iterator.hasNext();) {
-      Input dmnInputHeader = (Input) iterator.next();
+    dmnInputHeaders.forEach(dmnInputHeader -> {
       log.info("DmnInputHeader: {}", dmnInputHeader.getLabel());
       dmnInputHeaderLabels.add(dmnInputHeader.getLabel());
-    }
+    });
     return dmnInputHeaderLabels;
   }
 
   private Collection<String> getInputHeadersFromRequirement(String decisionName) {
     log.info("collect input headers for required decision {}", decisionName);
-    List<String> requiredHeaders = new ArrayList<String>();
     Decision decision = decisionMap.get(decisionName);
     DecisionTable decisionTable = decision.getChildElementsByType(DecisionTable.class).iterator().next();
-    return collectInputHeaderLabels(decisionTable, requiredHeaders);
+    return collectInputHeaderLabels(decisionTable, new ArrayList<String>());
   }
 
 }

@@ -37,10 +37,10 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectationResult).hasSize(4);
-    assertThat(expectationResult.get(2)).isEmpty();
-    assertThat(expectationResult.get(3)).isEmpty();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult.get("Dish")).hasSize(4);
+    assertThat(expectationResult.get("Dish").get(2)).isEmpty();
+    assertThat(expectationResult.get("Dish").get(3)).isEmpty();
   }
   
   @Test
@@ -53,10 +53,10 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectationResult).hasSize(4);
-    assertThat(expectationResult.get(2)).isEmpty();
-    assertThat(expectationResult.get(3)).isEmpty();    
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult.get("Dish and Drink")).hasSize(4);
+    assertThat(expectationResult.get("Dish and Drink").get(2)).isEmpty();
+    assertThat(expectationResult.get("Dish and Drink").get(3)).isEmpty();    
   }
   
   @Test
@@ -69,11 +69,11 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectationResult).hasSize(5);
-    assertThat(expectationResult.get(2)).containsEntry("Drink", new EvaluatedResult("Beer", "Grauburgunder"));
-    assertThat(expectationResult.get(3)).containsEntry("Drink", new EvaluatedResult("Grauburgunder", "Beer"));
-    assertThat(expectationResult.get(4)).contains(
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult.get("Dish and Drink")).hasSize(5);
+    assertThat(expectationResult.get("Dish and Drink").get(2)).containsEntry("Drink", new EvaluatedResult("Beer", "Grauburgunder"));
+    assertThat(expectationResult.get("Dish and Drink").get(3)).containsEntry("Drink", new EvaluatedResult("Grauburgunder", "Beer"));
+    assertThat(expectationResult.get("Dish and Drink").get(4)).contains(
         entry("Dish", new EvaluatedResult("Light salad and a nice steak", "Roastbeef")),
         entry("Drink", new EvaluatedResult("Prosecco", "Red Wine")));
   }
@@ -88,9 +88,8 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> expectationResults = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectationResults).hasSize(1);
-    
+    Map<String, List<Map<String, Object>>> expectationResults = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResults.get("Dish")).hasSize(1);
   }
 
   @Test
@@ -160,10 +159,10 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> decisionResults = dmnEvaluator.evaluateAllExpectations();
-    assertThat(decisionResults).hasSize(3);
-    assertThat(decisionResults.get(2)).containsKey("error:");
-    String errorMessage = (String) decisionResults.get(2).get("error:");
+    Map<String, List<Map<String, Object>>> decisionResults = dmnEvaluator.evaluateAllExpectations();
+    assertThat(decisionResults.get("Determine Employee")).hasSize(3);
+    assertThat(decisionResults.get("Determine Employee").get(2)).containsKey("error:");
+    String errorMessage = (String) decisionResults.get("Determine Employee").get(2).get("error:");
     assertThat(errorMessage).startsWith("DMN-03001 Hit policy 'UNIQUE' only allows a single rule to match.");
   }
   
@@ -219,9 +218,9 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String,Object>> expectations = dmnEvaluator.evaluateAllExpectations();
+    Map<String, List<Map<String, Object>>> expectations = dmnEvaluator.evaluateAllExpectations();
     
-    assertThat(expectations).hasSize(4);
+    assertThat(expectations.get("Beverages")).hasSize(4);
   }
   
   @Test
@@ -254,10 +253,10 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectationResult).hasSize(4);
-    assertThat(expectationResult.get(2)).containsEntry("Score", new EvaluatedResult("-6", "-5"));
-    assertThat(expectationResult.get(3)).isEmpty();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult.get("Determine Employee")).hasSize(4);
+    assertThat(expectationResult.get("Determine Employee").get(2)).containsEntry("Score", new EvaluatedResult("-6", "-5"));
+    assertThat(expectationResult.get("Determine Employee").get(3)).isEmpty();
   }
   
   @Test
@@ -290,9 +289,9 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String, Object>> expectationResult = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectationResult).hasSize(3);
-    assertThat(expectationResult.get(2)).containsEntry("Error", "No rule applied\n");
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectationResult.get("No matching rule")).hasSize(3);
+    assertThat(expectationResult.get("No matching rule").get(2)).containsEntry("Error", "No rule applied\n");
   }
   
   @Test
@@ -305,7 +304,9 @@ public class DmnEvaluatorTest {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    List<Map<String,Object>> expectations = dmnEvaluator.evaluateAllExpectations();
-    assertThat(expectations).hasSize(5);
+    Map<String, List<Map<String,Object>>> expectations = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectations).containsKeys("Beverages", "Dish");
+    assertThat(expectations.get("Dish")).hasSize(4);
+    assertThat(expectations.get("Beverages")).hasSize(3);
   }
 }

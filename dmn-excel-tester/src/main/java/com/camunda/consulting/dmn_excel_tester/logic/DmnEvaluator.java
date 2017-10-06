@@ -39,14 +39,16 @@ public class DmnEvaluator {
   /**
    * @return list of unexpected results 
    */
-  public List<Map<String, Object>> evaluateAllExpectations() {
+  public Map<String, List<Map<String, Object>>> evaluateAllExpectations() {
     List<DmnDecision> decisions = dmnEngine.parseDecisions(decisionModel);
-    List<Map<String, Object>> unexpectedResultList = new ArrayList<Map<String,Object>>();
-    unexpectedResultList.add(new HashMap<String, Object>());
-    unexpectedResultList.add(new HashMap<String, Object>());
+    HashMap<String, List<Map<String, Object>>> unexpectedResultMap = new HashMap<String, List<Map<String, Object>>>();
     
     // iterate over all decisions
     for (DmnDecision dmnDecision : decisions) {
+      List<Map<String, Object>> unexpectedResultList = new ArrayList<Map<String,Object>>();
+      unexpectedResultList.add(new HashMap<String, Object>());
+      unexpectedResultList.add(new HashMap<String, Object>());
+      
       log.info("Evaluating decision {}", dmnDecision.getName());
       HitPolicy hitPolicy = null;
       BuiltinAggregator builtinAggregator = null;
@@ -82,9 +84,10 @@ public class DmnEvaluator {
           unexpectedResultList.add(errorMap);
         }
       }
+      unexpectedResultMap.put(dmnDecision.getName(), unexpectedResultList);
     }
     log.info("");
-    return unexpectedResultList;
+    return unexpectedResultMap;
   }
 
 }

@@ -3,6 +3,7 @@ package com.camunda.consulting.dmn_excel_tester;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,17 @@ public class ExcelDmnValidatorTest {
     
     assertThat(errorList).isEmpty();
   }
+  
+  @Test
+  public void testDRDUnmatchedTables() throws Docx4JException, Xlsx4jException {
+    Map<String, List<Map<String, Object>>> dataFromExcel = readExcelFile("src/test/resources/validationErrors/invoiceBusinessDecisionsDRDExpected.xlsx");
+    DmnModelInstance dmnModelInstance = readDmnModelInstance("src/test/resources/validationErrors/invoiceBusinessDecisionsDRD.dmn");
+    
+    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, dmnModelInstance);
+    List<String> errorList = excelDmnValidator.validateMatchingExcelAndDmnModel();
+    
+    assertThat(errorList).contains("Excel sheet 'Tabelle1' didn't match decisions 'Invoice Classification' or 'Assign Approver Group'");
+  }
 
   public Map<String, List<Map<String, Object>>> readExcelFile(String fileName) throws Docx4JException, Xlsx4jException {
     File excelFile = new File(fileName);
@@ -64,6 +76,46 @@ public class ExcelDmnValidatorTest {
     File dmnTableFile = new File(fileName);
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
     return dmnModelInstance;
+  }
+  
+  @Test 
+  public void testCheckEqualSheetTableLists() {
+    List<String> sheetNames = Arrays.asList("dish", "beverages");
+    List<String> tableNames = Arrays.asList("beverages", "dish");
+    
+    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
+    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tableNames);
+    assertThat(resultList).isEmpty();
+  }
+  
+  @Test 
+  public void testCheckUnmatchedSingleSheetName() {
+    List<String> tablesNames = Arrays.asList("dish", "beverages");
+    List<String> sheetNames = Arrays.asList("Tabelle1");
+    
+    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
+    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tablesNames);
+    assertThat(resultList).isEqualTo("Excel sheet 'Tabelle1' didn't match decisions 'dish' or 'beverages'");
+  }
+
+  @Test 
+  public void testCheckUnmatched2SheetNames() {
+    List<String> tablesNames = Arrays.asList("dish", "beverages", "location");
+    List<String> sheetNames = Arrays.asList("Tabelle1", "location");
+    
+    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
+    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tablesNames);
+    assertThat(resultList).isEqualTo("Excel sheet 'Tabelle1' didn't match decisions 'dish' or 'beverages'");
+  }
+
+  @Test 
+  public void testCheckUnmatched3SheetNames() {
+    List<String> tablesNames = Arrays.asList("dish", "beverages", "location");
+    List<String> sheetNames = Arrays.asList("Tabelle1", "Tabelle2", "location");
+    
+    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
+    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tablesNames);
+    assertThat(resultList).isEqualTo("Excel sheets 'Tabelle1' and 'Tabelle2' didn't match decisions 'dish' or 'beverages'");
   }
 
 }
