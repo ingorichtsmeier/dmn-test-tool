@@ -21,7 +21,7 @@ import com.camunda.consulting.dmn_excel_tester.functional.Tuple;
 
 public class DmnTablePreparer {
   
-  public static final String HEADER_REPLACE_REGEX = "[\\? -()<>/=]";
+  public static final String HEADER_REPLACE_REGEX = "[\\? -()<>/=-]";
   
   private static final Logger log = LoggerFactory.getLogger(DmnTablePreparer.class);
 
@@ -45,7 +45,7 @@ public class DmnTablePreparer {
     Collection<Output> outputs = modelInstance.getModelElementsByType(Output.class);
     for (Iterator<Output> iterator = outputs.iterator(); iterator.hasNext();) {
       Output output = iterator.next();
-      output.setName(output.getLabel().replaceAll("[ -]", "_"));
+      output.setName(output.getLabel().replaceAll(HEADER_REPLACE_REGEX, "_"));
     }
     return new Tuple<DmnModelInstance, Map<String, String>>(modelInstance, null);
   }

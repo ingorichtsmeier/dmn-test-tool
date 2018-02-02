@@ -155,6 +155,12 @@ public class DmnTablePrepareTest {
   }
   
   @Test
+  public void testMapOutputName() {
+    assertThat(DmnTablePreparer.calculateHeader.apply("Expected: Product Know-How", ""))
+      .isEqualTo("Expected:_Product_Know_How");
+  }
+  
+  @Test
   public void testTransformInputHeaders() {
     File decisionTableFile = new File("src/test/resources/dmnPreparation/headers-with-special-chars.dmn");
     DmnModelInstance modelInstance = Dmn.readModelFromFile(decisionTableFile);

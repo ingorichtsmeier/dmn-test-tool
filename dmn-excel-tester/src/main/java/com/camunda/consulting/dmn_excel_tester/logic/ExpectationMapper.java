@@ -36,7 +36,7 @@ public class ExpectationMapper {
       DmnDecisionResult result, 
       HitPolicy hitPolicy, 
       BuiltinAggregator builtinAggregator) {
-    log.info("Check for unexpected in expected {}; evaluated {} with hitpolicy {}", expectedResultData.toString(), result.toString(), hitPolicy);
+    log.info("Check for unexpected in expected {}; evaluated {} with hitpolicy {} and builtin-aggregator {}", expectedResultData.toString(), result.toString(), hitPolicy, builtinAggregator);
     
     // result is a list of map with results per rule  
     // most generic result: (hit policy collect with three rules and two outputs per rule)
@@ -54,7 +54,7 @@ public class ExpectationMapper {
       if (hitPolicy.equals(HitPolicy.COLLECT) && 
           BuiltinAggregator.SUM.equals(builtinAggregator) == false) {
         List<Object> collectEntries = result.collectEntries(key);
-        log.info("Reduced result: {}", collectEntries);
+        log.info("Reduced result: {} for key {}", collectEntries, key);
         
         // Maybe the expectedResultData contains only a string
         Collection<Object> expectedList = null;

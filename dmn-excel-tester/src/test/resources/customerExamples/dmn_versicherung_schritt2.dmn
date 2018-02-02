@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/1.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="definitions_0drklgz" name="Decision" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="Decision_13nychf" name="Versicherung">
+    <extensionElements>
+      <biodi:bounds x="200" y="200" width="180" height="80" />
+    </extensionElements>
+    <decisionTable hitPolicy="COLLECT">
+      <input id="InputClause_1l6o61p" label="Claim Type" camunda:inputVariable="">
+        <inputExpression id="LiteralExpression_0qryak2" typeRef="string">
+          <text></text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0pq9513" label="Object" camunda:inputVariable="">
+        <inputExpression id="LiteralExpression_1u102e1" typeRef="string">
+          <text></text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1m702vr" label="Expenditure" camunda:inputVariable="">
+        <inputExpression id="LiteralExpression_1t02ffe" typeRef="double">
+          <text></text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_1oxvsas" label="Experience Category" name="" typeRef="string">
+        <outputValues id="UnaryTests_0d6nq4u">
+          <text><![CDATA["Junior","Experienced","Senior"]]></text>
+        </outputValues>
+      </output>
+      <output id="OutputClause_0niectt" label="Product Know-How" name="" typeRef="string">
+        <outputValues id="UnaryTests_1ga10ct">
+          <text><![CDATA["Car","Third Party Liability"]]></text>
+        </outputValues>
+      </output>
+      <output id="output_1" label="Special Skills" name="" typeRef="string">
+        <outputValues id="UnaryTests_19s36l3">
+          <text><![CDATA["Mobile Phone"]]></text>
+        </outputValues>
+      </output>
+      <rule id="row-778246000-1">
+        <description></description>
+        <inputEntry id="UnaryTests_1weca2i">
+          <text><![CDATA["Car Accident"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1j1pht3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1de1rln">
+          <text><![CDATA[< 1000]]></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0npfevd">
+          <text><![CDATA["Junior"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0s51hpr">
+          <text><![CDATA["Car"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0gf96ym">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="row-778246000-2">
+        <inputEntry id="UnaryTests_018fqra">
+          <text><![CDATA["Car Accident"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0g9lz11">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gb0lbf">
+          <text>[1000..10000[</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0naeums">
+          <text><![CDATA["Experienced"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1prru7d">
+          <text><![CDATA["Car"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1vb9gzv">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="row-778246000-3">
+        <inputEntry id="UnaryTests_12m1nsu">
+          <text><![CDATA["Car Accident"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03b8ho5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1td9zmg">
+          <text><![CDATA[>= 10000]]></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1vwo8um">
+          <text><![CDATA["Senior"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0k6bdrv">
+          <text><![CDATA["Car"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0whbwag">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="row-778246000-6">
+        <description>nur für Mary</description>
+        <inputEntry id="UnaryTests_0d2hjkr">
+          <text><![CDATA["Third Party Liability"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hyynb6">
+          <text><![CDATA["Mobile Phone"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ahxtfa">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_08mjmfm">
+          <text><![CDATA["Experienced"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_12bk9e5">
+          <text><![CDATA["Third Party Liability"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1s5cip9">
+          <text><![CDATA["Mobile Phone"]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="row-778246000-4">
+        <description></description>
+        <inputEntry id="UnaryTests_1clnsnd">
+          <text><![CDATA["Third Party Liability"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wguwan">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wur4ab">
+          <text><![CDATA[< 500]]></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1o7wmbt">
+          <text><![CDATA["Junior"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0n2mwlf">
+          <text><![CDATA["Third Party Liability"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0m7ltov">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="row-778246000-5">
+        <inputEntry id="UnaryTests_11j7na8">
+          <text><![CDATA["Third Party Liability"]]></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09jb76j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13pn7ub">
+          <text><![CDATA[>= 500]]></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1ve7nnu">
+          <text><![CDATA["Senior"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_19lp63n">
+          <text><![CDATA["Third Party Liability"]]></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ww7rxt">
+          <text></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

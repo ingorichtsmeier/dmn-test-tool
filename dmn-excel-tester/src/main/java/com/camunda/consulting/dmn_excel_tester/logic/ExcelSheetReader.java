@@ -88,12 +88,12 @@ public class ExcelSheetReader {
           Coordinates coordinates = new Coordinates(cell.getR());
           if (cell.getT().equals(STCellType.S)) {
             String cellValue = sharedStrings.getContents().getSi().get(Integer.parseInt(cell.getV())).getT().getValue();
-            log.info("  {} (S) contains {}", cell.getR(), cellValue);
+            log.info("  {} (S) contains '{}'", cell.getR(), cellValue);
             // cell.getR() contains coordinates A1, B2 or C3 (Column, Row)
             if (rowIndex.equals(1L)) {
               // handle header 
               headerContent.put(coordinates.getColumnName(), cellValue); //.replaceAll("[ -]+", "_")
-              log.info("Set header column {} to {}", coordinates.getColumnName(), cellValue);
+              log.info("Set header column '{}' to '{}'", coordinates.getColumnName(), cellValue);
             } else {
               // handle content
               String columnNameEscaped = ((String) headerContent.get(coordinates.getColumnName()))
@@ -108,29 +108,29 @@ public class ExcelSheetReader {
                   cellList.add(translateBoolean.apply(cellElement.trim()));
                 }
                 rowContent.put(columnNameEscaped, cellList);
-                log.info("Fill key {} with list {}", columnNameEscaped, cellList);
+                log.info("Fill key '{}' with list '{}'", columnNameEscaped, cellList);
               } else {
                 // it's just an ordinary string
                 //TODO: try cellvalue -> translateValue(cellValue);
                 rowContent.put(columnNameEscaped, translateBoolean.apply(cellValue));
-                log.info("Fill key {} with content {}", columnNameEscaped, cellValue);
+                log.info("Fill key '{}' with content '{}'", columnNameEscaped, cellValue);
               }
             }
           } else {
             // TODO: handle other cell types
             String cellValue = cell.getV();
-            log.info("  {} contains {}", cell.getR(), cellValue );
+            log.info("  {} contains '{}'", cell.getR(), cellValue );
             String columnNameEscaped = ((String) headerContent.get(coordinates.getColumnName())).replaceAll("[ -]+", "_");
             rowContent.put(columnNameEscaped, cellValue);
-            log.info("Fill other cell type key {} with content {}", columnNameEscaped, cellValue);
+            log.info("Fill other cell type key '{}' with content '{}'", columnNameEscaped, cellValue);
           }
         }
         if (resultList.size() <= rowIndex) {
           resultList.add(rowContent);
-          log.info("Added content {}", rowContent.toString());
+          log.info("Added content '{}'", rowContent.toString());
         } else {
           resultList.set(rowIndex.intValue(), rowContent);
-          log.info("Set index {} to content {}", rowIndex.intValue(), rowContent.toString());
+          log.info("Set index '{}' to content '{}'", rowIndex.intValue(), rowContent.toString());
         }
       }
       resultList.set(1, headerContent);

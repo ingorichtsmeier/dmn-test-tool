@@ -21,7 +21,9 @@ import org.junit.Test;
 import org.xlsx4j.exceptions.Xlsx4jException;
 
 import com.camunda.consulting.dmn_excel_tester.data.EvaluatedResult;
+import com.camunda.consulting.dmn_excel_tester.functional.Tuple;
 import com.camunda.consulting.dmn_excel_tester.logic.DmnEvaluator;
+import com.camunda.consulting.dmn_excel_tester.logic.DmnTablePreparer;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelSheetReader;
 import com.camunda.consulting.dmn_excel_tester.logic.ExpectationMapper;
 
@@ -308,5 +310,24 @@ public class DmnEvaluatorTest {
     assertThat(expectations).containsKeys("Beverages", "Dish");
     assertThat(expectations.get("Dish")).hasSize(4);
     assertThat(expectations.get("Beverages")).hasSize(3);
+  }
+  
+  @Test
+  public void testCustomerExample1() throws Docx4JException, Xlsx4jException {
+    File dmnFile = new File("src/test/resources/customerExamples/dmn_versicherung_schritt2.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnFile);
+    
+    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
+    Tuple<DmnModelInstance, Map<String, String>> preparedTable = dmnTablePreparer.prepareTable(dmnModelInstance);
+    
+    File excelFile = new File("src/test/resources/customerExamples/testdaten_versicherung.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    
+    DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable._1, dataFromExcel);
+    Map<String, List<Map<String, Object>>> expectations = dmnEvaluator.evaluateAllExpectations();
+    assertThat(expectations).containsKey("Versicherung");
+    Map<String, Object> versicherungResult = expectations.get("Versicherung").get(2);
+    assertThat(versicherungResult).isEmpty();
   }
 }
