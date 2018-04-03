@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.camunda.consulting.dmn_excel_tester.data.EvaluatedResult;
+import com.camunda.consulting.dmn_excel_tester.functional.Tuple;
 
 public class ExpectationMapper {
   
@@ -36,8 +37,24 @@ public class ExpectationMapper {
     return result;
   };
 
-  public Map<String, Object> getUnexpectedResults(Map<String, Object> expectedResultData, 
-      DmnDecisionResult result, 
+  /**
+   * <pre>
+   * forEach(expectedResult.key -> { 
+   *   if (hitPolicy == COLLECT) { 
+   *     compareResultAgainstExpectations (from list of results) 
+   *   } else { 
+   *     compareResultAgainstExpectations (of one result) 
+   *   } 
+   * } 
+   * </pre>
+   * @param result
+   * @param expectedResultData
+   * @param hitPolicy
+   * @param builtinAggregator
+   * @return
+   */
+  public Map<String, Object> getUnexpectedResults(DmnDecisionResult result, 
+      Map<String, Object> expectedResultData, 
       HitPolicy hitPolicy, 
       BuiltinAggregator builtinAggregator) {
     log.info("Check for unexpected in expected {}; evaluated {} with hitpolicy {} and builtin-aggregator {}", expectedResultData.toString(), result.toString(), hitPolicy, builtinAggregator);
@@ -111,5 +128,12 @@ public class ExpectationMapper {
     log.info("Unexpected Results: {}", unexpectedResults);
     return unexpectedResults;
   }
+  
+//  public static Function<Tuple<DmnDecisionResult, Map<String, Object>>, Map<String, Object>> collectUnexpectedResultsFromSingleHitPolicy = 
+//      (Tuple<DmnDecisionResult, Map<String, Object>> input) -> {
+//    ConcurrentMap<String, Object> unexpectedResults = new ConcurrentHashMap<String, Object>();
+//    input._1.forEach();
+//    return unexpectedResults;
+//  };
 
 }

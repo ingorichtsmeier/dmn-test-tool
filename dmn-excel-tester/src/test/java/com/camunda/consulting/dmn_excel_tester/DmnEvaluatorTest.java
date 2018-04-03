@@ -79,7 +79,7 @@ public class DmnEvaluatorTest {
         entry("Drink", new EvaluatedResult("Prosecco", "Red Wine")));
   }
   
-//  TODO: @Test
+//  TODO: @Test testEvaluateFormulars()
   public void testEvaluateFormulars() throws Docx4JException, Xlsx4jException {
     File dmnTableFile = new File("src/test/resources/03-Formulas-and-functions.dmn");
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
@@ -122,8 +122,7 @@ public class DmnEvaluatorTest {
     expectedResults.put("Dish", "Steak");
     
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
-    ExpectationMapper expectationMapper = new ExpectationMapper();
-    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
+    Map<String, Object> unexpectedResults = new ExpectationMapper().getUnexpectedResults(decisionResult, expectedResults, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).containsEntry("Dish", new EvaluatedResult("Steak", "Stew"));
   }
 
@@ -133,8 +132,7 @@ public class DmnEvaluatorTest {
     expectedResults.put("Dish", "Stew");
     
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
-    ExpectationMapper expectationMapper = new ExpectationMapper();
-    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
+    Map<String, Object> unexpectedResults = new ExpectationMapper().getUnexpectedResults(decisionResult, expectedResults, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).isEmpty();
   }
 
@@ -171,8 +169,7 @@ public class DmnEvaluatorTest {
     expectedResults.put("Drinks", Arrays.asList("Budweiser", "Water", "Apple Juice"));
     
     DmnDecisionResult decisionResult = evaluateBeveragesWithChildrenDmn();
-    ExpectationMapper expectationMapper = new ExpectationMapper();
-    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.COLLECT, null);
+    Map<String, Object> unexpectedResults = new ExpectationMapper().getUnexpectedResults(decisionResult, expectedResults, HitPolicy.COLLECT, null);
     assertThat(unexpectedResults).containsEntry("Drinks", new EvaluatedResult(Arrays.asList("Budweiser"), Arrays.asList("Aecht Schlenkerla Rauchbier")));
   }
 
@@ -192,8 +189,7 @@ public class DmnEvaluatorTest {
     expectedResult.put("Drinks", "Water");
     
     DmnDecisionResult decisionResult = evaluateBeveragesWithUnknownDishAndNoChildrenDmn();
-    ExpectationMapper expectationMapper = new ExpectationMapper();
-    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, null);
+    Map<String, Object> unexpectedResults = new ExpectationMapper().getUnexpectedResults(decisionResult, expectedResult, HitPolicy.COLLECT, null);
     assertThat(unexpectedResults).isEmpty();
   }
 
@@ -228,8 +224,7 @@ public class DmnEvaluatorTest {
     expectedResult.put("Score", "-6");
     
     DmnDecisionResult decisionResult = evaluateScoringDmn();
-    ExpectationMapper expectationMapper = new ExpectationMapper();
-    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, BuiltinAggregator.SUM);
+    Map<String, Object> unexpectedResults = new ExpectationMapper().getUnexpectedResults(decisionResult, expectedResult, HitPolicy.COLLECT, BuiltinAggregator.SUM);
     assertThat(unexpectedResults).containsEntry("Score", new EvaluatedResult("-6", "-5"));
   }
 
@@ -264,8 +259,7 @@ public class DmnEvaluatorTest {
     expectedResult.put("Output", "would not match");
     
     DmnDecisionResult emptyDecisionResult = evaluateNoMatchingRuleDmn();
-    ExpectationMapper expectationMapper = new ExpectationMapper();
-    Map<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, emptyDecisionResult, HitPolicy.UNIQUE, null);
+    Map<String,Object> unexpectedResults = new ExpectationMapper().getUnexpectedResults(emptyDecisionResult, expectedResult, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).containsEntry("Error", "No rule applied\n");    
   }
 
@@ -309,8 +303,7 @@ public class DmnEvaluatorTest {
     assertThat(expectations.get("Beverages")).hasSize(3);
   }
   
-//  TODO: make this test green: refactor loop over all decicions
-//  @Test
+//  TODO: @Test testDRDDishOnlyResult()
   public void testDRDDishOnlyResult() throws Docx4JException, Xlsx4jException {
     File drdFile = new File("src/test/resources/drd/dinnerDecisions.dmn");
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(drdFile);

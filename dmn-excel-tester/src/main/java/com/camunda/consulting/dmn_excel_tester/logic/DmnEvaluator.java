@@ -25,11 +25,8 @@ public class DmnEvaluator {
   
   private DmnEngine dmnEngine;
 
-  private ExpectationMapper expectationMapper;
-
   public DmnEvaluator() {
     this.dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
-    this.expectationMapper = new ExpectationMapper();
   }
 
   /**
@@ -75,7 +72,7 @@ public class DmnEvaluator {
         try {
           DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
           log.info("Result: {}", result);
-          Map<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result, hitPolicy, builtinAggregator);
+          Map<String, Object> unexpectedResult = new ExpectationMapper().getUnexpectedResults(result, expectedResultData, hitPolicy, builtinAggregator);
           for (DmnDecisionResultEntries resultEntries : result) {
             log.info("ResultEntries {}", resultEntries.toString());
           }
