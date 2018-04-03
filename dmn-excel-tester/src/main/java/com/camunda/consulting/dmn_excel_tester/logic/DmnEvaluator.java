@@ -71,7 +71,7 @@ public class DmnEvaluator {
       // iterate over lines in the sheet
       for (int i = 2; i < sheetData.size(); i++) {
         Map<String, Object> decisionData = sheetData.get(i);
-        Map<String, Object> expectedResultData = expectationMapper.getExpectationData(sheetData.get(i));
+        Map<String, Object> expectedResultData = ExpectationMapper.getExpectationData.apply(sheetData.get(i));
         try {
           DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
           log.info("Result: {}", result);

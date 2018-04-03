@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.xlsx4j.exceptions.Xlsx4jException;
 
 import com.camunda.consulting.dmn_excel_tester.data.EvaluatedResult;
-import com.camunda.consulting.dmn_excel_tester.functional.Tuple;
 import com.camunda.consulting.dmn_excel_tester.logic.DmnEvaluator;
 import com.camunda.consulting.dmn_excel_tester.logic.DmnTablePreparer;
 import com.camunda.consulting.dmn_excel_tester.logic.ExcelSheetReader;
@@ -96,24 +95,22 @@ public class DmnEvaluatorTest {
 
   @Test
   public void testExpectationsFromDishInput() {
-    ExpectationMapper expectationMapper = new ExpectationMapper();
     Map<String, Object> testData = new HashMap<String, Object>();
     testData.put("Season", "Winter");
     testData.put("Number_of_guests", 3);
     testData.put("Expected:_Dish", "Stew");
-    Map<String, Object> expectationData = expectationMapper.getExpectationData(testData );
+    Map<String, Object> expectationData = ExpectationMapper.getExpectationData.apply(testData );
     assertThat(expectationData).containsEntry("Dish", "Stew");
   }
 
   @Test
   public void testExpectationsFromDishAndDrinkInput() {
-    ExpectationMapper expectationMapper = new ExpectationMapper();
     Map<String, Object> testData = new HashMap<String, Object>();
     testData.put("Season", "Winter");
     testData.put("Number_of_guests", 3);
     testData.put("Expected:_Dish", "Stew");
     testData.put("Expected:_Drink", "Beer");
-    Map<String, Object> expectationData = expectationMapper.getExpectationData(testData );
+    Map<String, Object> expectationData = ExpectationMapper.getExpectationData.apply(testData );
     assertThat(expectationData).containsOnly(
         entry("Dish", "Stew"), 
         entry("Drink", "Beer"));

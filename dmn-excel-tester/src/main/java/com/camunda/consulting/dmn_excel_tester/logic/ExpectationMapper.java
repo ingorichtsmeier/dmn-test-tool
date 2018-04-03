@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnDecisionResultEntries;
@@ -20,17 +23,18 @@ public class ExpectationMapper {
   
   private static final Logger log = LoggerFactory.getLogger(ExpectationMapper.class);
 
-  public Map<String, Object> getExpectationData(Map<String, Object> map) {
-    HashMap<String, Object> result = new HashMap<String, Object>();
-    for (Iterator<String> iterator = map.keySet().iterator(); iterator.hasNext();) {
-      String key = (String) iterator.next();
-      if (key.startsWith("Expected:_")) {
-        result.put(key.replaceFirst("Expected:_", ""), map.get(key));
+  public static Function<Map<String, Object>, Map<String, Object>> getExpectationData = (Map<String, Object> map) -> {
+    ConcurrentMap<String, Object> result = new ConcurrentHashMap<String, Object>();
+
+    map.forEach((key, value) -> { 
+      if (key.startsWith("Expected:_")) { 
+        result.put(key.replaceFirst("Expected:_", ""), map.get(key)); 
       }
-    }
+    });
+    
     log.info("Expected result: {}", result.toString());
     return result;
-  }
+  };
 
   public Map<String, Object> getUnexpectedResults(Map<String, Object> expectedResultData, 
       DmnDecisionResult result, 
