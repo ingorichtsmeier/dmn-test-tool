@@ -32,7 +32,7 @@ public class ExpectationMapper {
     return result;
   }
 
-  public HashMap<String, Object> getUnexpectedResults(Map<String, Object> expectedResultData, 
+  public Map<String, Object> getUnexpectedResults(Map<String, Object> expectedResultData, 
       DmnDecisionResult result, 
       HitPolicy hitPolicy, 
       BuiltinAggregator builtinAggregator) {

@@ -38,8 +38,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectationResult.get("Dish")).hasSize(4);
     assertThat(expectationResult.get("Dish").get(2)).isEmpty();
     assertThat(expectationResult.get("Dish").get(3)).isEmpty();
@@ -54,8 +54,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectationResult.get("Dish and Drink")).hasSize(4);
     assertThat(expectationResult.get("Dish and Drink").get(2)).isEmpty();
     assertThat(expectationResult.get("Dish and Drink").get(3)).isEmpty();    
@@ -70,8 +70,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectationResult.get("Dish and Drink")).hasSize(5);
     assertThat(expectationResult.get("Dish and Drink").get(2)).containsEntry("Drink", new EvaluatedResult("Beer", "Grauburgunder"));
     assertThat(expectationResult.get("Dish and Drink").get(3)).containsEntry("Drink", new EvaluatedResult("Grauburgunder", "Beer"));
@@ -89,8 +89,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectationResults = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectationResults = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectationResults.get("Dish")).hasSize(1);
   }
 
@@ -126,7 +126,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
+    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).containsEntry("Dish", new EvaluatedResult("Steak", "Stew"));
   }
 
@@ -137,7 +137,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
+    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).isEmpty();
   }
 
@@ -160,8 +160,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> decisionResults = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> decisionResults = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(decisionResults.get("Determine Employee")).hasSize(3);
     assertThat(decisionResults.get("Determine Employee").get(2)).containsKey("error:");
     String errorMessage = (String) decisionResults.get("Determine Employee").get(2).get("error:");
@@ -175,7 +175,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateBeveragesWithChildrenDmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.COLLECT, null);
+    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResults, decisionResult, HitPolicy.COLLECT, null);
     assertThat(unexpectedResults).containsEntry("Drinks", new EvaluatedResult(Arrays.asList("Budweiser"), Arrays.asList("Aecht Schlenkerla Rauchbier")));
   }
 
@@ -196,7 +196,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateBeveragesWithUnknownDishAndNoChildrenDmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, null);
+    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, null);
     assertThat(unexpectedResults).isEmpty();
   }
 
@@ -219,8 +219,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectations = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectations = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     
     assertThat(expectations.get("Beverages")).hasSize(4);
   }
@@ -232,7 +232,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult decisionResult = evaluateScoringDmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, BuiltinAggregator.SUM);
+    Map<String, Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, decisionResult, HitPolicy.COLLECT, BuiltinAggregator.SUM);
     assertThat(unexpectedResults).containsEntry("Score", new EvaluatedResult("-6", "-5"));
   }
 
@@ -254,8 +254,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectationResult.get("Determine Employee")).hasSize(4);
     assertThat(expectationResult.get("Determine Employee").get(2)).containsEntry("Score", new EvaluatedResult("-6", "-5"));
     assertThat(expectationResult.get("Determine Employee").get(3)).isEmpty();
@@ -268,7 +268,7 @@ public class DmnEvaluatorTest {
     
     DmnDecisionResult emptyDecisionResult = evaluateNoMatchingRuleDmn();
     ExpectationMapper expectationMapper = new ExpectationMapper();
-    HashMap<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, emptyDecisionResult, HitPolicy.UNIQUE, null);
+    Map<String,Object> unexpectedResults = expectationMapper.getUnexpectedResults(expectedResult, emptyDecisionResult, HitPolicy.UNIQUE, null);
     assertThat(unexpectedResults).containsEntry("Error", "No rule applied\n");    
   }
 
@@ -290,8 +290,8 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectationResult = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectationResult.get("No matching rule")).hasSize(3);
     assertThat(expectationResult.get("No matching rule").get(2)).containsEntry("Error", "No rule applied\n");
   }
@@ -305,11 +305,27 @@ public class DmnEvaluatorTest {
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(dmnModelInstance, dataFromExcel);
-    Map<String, List<Map<String,Object>>> expectations = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String,Object>>> expectations = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
     assertThat(expectations).containsKeys("Beverages", "Dish");
     assertThat(expectations.get("Dish")).hasSize(4);
     assertThat(expectations.get("Beverages")).hasSize(3);
+  }
+  
+//  TODO: make this test green: refactor loop over all decicions
+//  @Test
+  public void testDRDDishOnlyResult() throws Docx4JException, Xlsx4jException {
+    File drdFile = new File("src/test/resources/drd/dinnerDecisions.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(drdFile);
+    
+    File excelFile = new File("src/test/resources/drd/dinnerDecisionsOnlyDishExpected.xlsx");
+    ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
+    Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
+    
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String,Object>>> expectations = dmnEvaluator.evaluateAllExpectations(dmnModelInstance, dataFromExcel);
+    assertThat(expectations).containsOnlyKeys("Dish");
+    assertThat(expectations.get("Dish")).hasSize(4);
   }
   
   @Test
@@ -317,15 +333,12 @@ public class DmnEvaluatorTest {
     File dmnFile = new File("src/test/resources/customerExamples/dmn_versicherung_schritt2.dmn");
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnFile);
     
-    DmnTablePreparer dmnTablePreparer = new DmnTablePreparer();
-    Tuple<DmnModelInstance, Map<String, String>> preparedTable = dmnTablePreparer.prepareTable(dmnModelInstance);
-    
     File excelFile = new File("src/test/resources/customerExamples/testdaten_versicherung.xlsx");
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
-    DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable._1, dataFromExcel);
-    Map<String, List<Map<String, Object>>> expectations = dmnEvaluator.evaluateAllExpectations();
+    DmnEvaluator dmnEvaluator = new DmnEvaluator();
+    Map<String, List<Map<String, Object>>> expectations = dmnEvaluator.evaluateAllExpectations(DmnTablePreparer.prepareTableAndCollectHeaders.apply(dmnModelInstance)._1, dataFromExcel);
     assertThat(expectations).containsKey("Versicherung");
     Map<String, Object> versicherungResult = expectations.get("Versicherung").get(2);
     assertThat(versicherungResult).isEmpty();

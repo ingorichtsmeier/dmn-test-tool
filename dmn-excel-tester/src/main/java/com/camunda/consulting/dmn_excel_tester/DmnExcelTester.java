@@ -127,8 +127,8 @@ public class DmnExcelTester extends Application {
       return validationErrorMap;
     } else {    
       // evaluate the decisions with values from the excel sheet
-      DmnEvaluator dmnEvaluator = new DmnEvaluator(preparedTable, dataFromExcel);
-      return dmnEvaluator.evaluateAllExpectations();
+      DmnEvaluator dmnEvaluator = new DmnEvaluator();
+      return dmnEvaluator.evaluateAllExpectations(preparedTable, dataFromExcel);
     }
   }
 

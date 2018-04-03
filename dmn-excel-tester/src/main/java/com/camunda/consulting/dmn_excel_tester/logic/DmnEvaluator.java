@@ -23,15 +23,11 @@ public class DmnEvaluator {
   
   private static final Logger log = LoggerFactory.getLogger(DmnEvaluator.class);
   
-  private DmnModelInstance decisionModel;
-  private Map<String, List<Map<String, Object>>> testData;
   private DmnEngine dmnEngine;
 
   private ExpectationMapper expectationMapper;
 
-  public DmnEvaluator(DmnModelInstance decisionModel, Map<String, List<Map<String, Object>>> dataFromExcel) {
-    this.decisionModel = decisionModel;
-    this.testData = dataFromExcel;
+  public DmnEvaluator() {
     this.dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
     this.expectationMapper = new ExpectationMapper();
   }
@@ -39,14 +35,22 @@ public class DmnEvaluator {
   /**
    * @return list of unexpected results 
    */
-  public Map<String, List<Map<String, Object>>> evaluateAllExpectations() {
+  public Map<String, List<Map<String, Object>>> evaluateAllExpectations(DmnModelInstance decisionModel, Map<String, List<Map<String, Object>>> testData) {
     List<DmnDecision> decisions = dmnEngine.parseDecisions(decisionModel);
     HashMap<String, List<Map<String, Object>>> unexpectedResultMap = new HashMap<String, List<Map<String, Object>>>();
     
+    // iterate over all tables to test
+    // or 
+    // (no sheets used in excel file) test what?
+    
+    // TODO: iterate over keys of testData: Sheets in the Excel file, Sheet name maps to dmnDecision
+        
     // iterate over all decisions
     for (DmnDecision dmnDecision : decisions) {
       List<Map<String, Object>> unexpectedResultList = new ArrayList<Map<String,Object>>();
+      // index 0: not used in Excel
       unexpectedResultList.add(new HashMap<String, Object>());
+      // index 1: Header in Excel
       unexpectedResultList.add(new HashMap<String, Object>());
       
       log.info("Evaluating decision {}", dmnDecision.getName());
@@ -64,13 +68,14 @@ public class DmnEvaluator {
       if (sheetData == null) {
         sheetData = testData.entrySet().iterator().next().getValue();
       }
+      // iterate over lines in the sheet
       for (int i = 2; i < sheetData.size(); i++) {
         Map<String, Object> decisionData = sheetData.get(i);
         Map<String, Object> expectedResultData = expectationMapper.getExpectationData(sheetData.get(i));
         try {
           DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
           log.info("Result: {}", result);
-          HashMap<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result, hitPolicy, builtinAggregator);
+          Map<String, Object> unexpectedResult = expectationMapper.getUnexpectedResults(expectedResultData, result, hitPolicy, builtinAggregator);
           for (DmnDecisionResultEntries resultEntries : result) {
             log.info("ResultEntries {}", resultEntries.toString());
           }
