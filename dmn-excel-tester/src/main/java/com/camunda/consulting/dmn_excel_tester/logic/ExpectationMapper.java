@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,16 +20,13 @@ public class ExpectationMapper {
   private static final Logger log = LoggerFactory.getLogger(ExpectationMapper.class);
 
   public static Function<Map<String, Object>, Map<String, Object>> getExpectationData = (Map<String, Object> map) -> {
-    ConcurrentMap<String, Object> result = new ConcurrentHashMap<String, Object>();
-
-    map.forEach((key, value) -> { 
-      if (key.startsWith("Expected:_")) { 
-        
-        @SuppressWarnings("unchecked")
-        List<Object> listValue = (map.get(key) instanceof List) ? (List<Object>) map.get(key) : Arrays.asList(map.get(key));
-        result.put(key.replaceFirst("Expected:_", ""), listValue); 
-      }
-    });
+    Map<String, Object> result = map
+        .entrySet()
+        .stream()
+        .filter(value -> value.getKey().startsWith("Expected:_"))
+        .collect(Collectors.toMap(
+            value -> value.getKey().replaceFirst("Expected:_", ""), 
+            value -> (value.getValue() instanceof List) ? value.getValue() : Arrays.asList(value.getValue())));
     
     log.info("Expected result: {}", result.toString());
     return result;
