@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.assertj.core.data.MapEntry;
 import org.camunda.bpm.dmn.engine.DmnDecision;
@@ -13,6 +14,7 @@ import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnDecisionResultEntries;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
+import org.camunda.bpm.dmn.engine.impl.DmnDecisionResultException;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.junit.Test;
@@ -33,6 +35,14 @@ public class ExampleEvaluations {
     System.out.println("SingleEntry: " + decisionResult);
     Object singleEntry = decisionResult.getSingleEntry();
     assertThat(singleEntry).isEqualTo("Light Salad and a nice Steak");
+    
+    assertThat(checkForSingleEntry.apply(decisionResult)).isTrue();
+    
+    assertThat(decisionResult.getSingleResult()).containsEntry("Dish", "Light Salad and a nice Steak");
+    assertThat(checkForSingleResult.apply(decisionResult)).isTrue();
+    
+    List<Object> dishEntries = decisionResult.collectEntries("Dish");
+    assertThat(dishEntries).containsExactly("Light Salad and a nice Steak");
   }
   
   @Test
@@ -48,7 +58,18 @@ public class ExampleEvaluations {
     DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(dmnDecision, variables);
     System.out.println("SingleResult: " + decisionResult);
     DmnDecisionResultEntries resultEntries = decisionResult.getSingleResult();
-    assertThat(resultEntries).contains(MapEntry.entry("Dish", "Light salad and a nice steak"), MapEntry.entry("Drink", "Prosecco"));
+    assertThat(resultEntries).contains(
+        MapEntry.entry("Dish", "Light salad and a nice steak"), 
+        MapEntry.entry("Drink", "Prosecco"));
+    
+    assertThat(checkForSingleResult.apply(decisionResult)).isTrue();
+    
+    assertThat(checkForSingleEntry.apply(decisionResult)).isFalse();
+    
+    List<Object> dishEntries = decisionResult.collectEntries("Dish");
+    assertThat(dishEntries).containsExactly("Light salad and a nice steak");
+    List<Object> drinkEntries = decisionResult.collectEntries("Drink");
+    assertThat(drinkEntries).containsExactly("Prosecco");
   }
   
   @Test
@@ -64,7 +85,10 @@ public class ExampleEvaluations {
     DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(dmnDecision, variables);
     System.out.println("CollectEntries (C): " + decisionResult);
     List<Object> collectEntries = decisionResult.collectEntries("Drinks");
-    assertThat(collectEntries).contains("Bordeaux", "Water", "Apple Juice");
+    assertThat(collectEntries).containsOnly("Bordeaux", "Water", "Apple Juice");
+    
+    assertThat(checkForSingleEntry.apply(decisionResult)).isFalse();
+    assertThat(checkForSingleResult.apply(decisionResult)).isFalse();
   }
   
   @Test
@@ -80,14 +104,48 @@ public class ExampleEvaluations {
     variables.put("Expenditure", 550);
     DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(dmnDecision, variables);
     System.out.println("ResultList (C): " + decisionResult);
+
     List<Object> experienceCategory = decisionResult.collectEntries("Experience_Category");
-    assertThat(experienceCategory).contains("Experienced", "Senior");
-    Map<String,Object> expectedListEntry = new HashMap<String, Object>();
-    expectedListEntry.put("Experience_Category", "Experienced");
-    expectedListEntry.put("Product_Know_How", "Third Party Liability");
-    expectedListEntry.put("Special_Skills", "Mobile Phone");
+    assertThat(experienceCategory).containsExactly("Experienced", "Senior");
+    List<Object> knowHowList = decisionResult.collectEntries("Product_Know_How");
+    assertThat(knowHowList).containsExactly("Third Party Liability", "Third Party Liability");
+    List<Object> skillList = decisionResult.collectEntries("Special_Skills");
+    assertThat(skillList).containsExactly("Mobile Phone");
+    
+    Map<String,Object> firstExpectedListEntry = new HashMap<String, Object>();
+    firstExpectedListEntry.put("Experience_Category", "Experienced");
+    firstExpectedListEntry.put("Product_Know_How", "Third Party Liability");
+    firstExpectedListEntry.put("Special_Skills", "Mobile Phone");
+    HashMap<String, Object> secondExpectedEntry = new HashMap<String, Object>();
+    secondExpectedEntry.put("Experience_Category", "Senior");
+    secondExpectedEntry.put("Product_Know_How", "Third Party Liability");
     List<Map<String,Object>> resultList = decisionResult.getResultList();
-    assertThat(resultList).contains(expectedListEntry);
+    assertThat(resultList).contains(firstExpectedListEntry, secondExpectedEntry);
+    
+    assertThat(checkForSingleEntry.apply(decisionResult)).isFalse();
+    assertThat(checkForSingleResult.apply(decisionResult)).isFalse();
   }
+  
+  public static Function<DmnDecisionResult, Boolean> checkForSingleEntry = (DmnDecisionResult decisionResult) -> {
+    boolean hasSingleEntry;
+    try {
+      decisionResult.getSingleEntry();
+      hasSingleEntry = true;
+    } catch (DmnDecisionResultException e) {
+      hasSingleEntry = false;
+    }
+    return hasSingleEntry;
+  };
+  
+  public static Function<DmnDecisionResult, Boolean> checkForSingleResult = (DmnDecisionResult decisionResult) -> {
+    boolean hasSingleResult;
+    try {
+      decisionResult.getSingleResult();
+      hasSingleResult = true;
+    } catch (DmnDecisionResultException e) {
+      hasSingleResult = false;
+    }
+    return hasSingleResult;
+  };
 
 }

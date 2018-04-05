@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" id="definitions_0xnft4b" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision" name="Boolean Values">
+    <decisionTable id="decisionTable" hitPolicy="COLLECT">
+      <input id="input1" label="True">
+        <inputExpression id="inputExpression1" typeRef="boolean">        <text></text>
+</inputExpression>
+      </input>
+      <input id="InputClause_1jq0y2f" label="False">
+        <inputExpression id="LiteralExpression_1jn4iq7" typeRef="boolean" />
+      </input>
+      <output id="output1" label="Result 1" name="" typeRef="boolean" />
+      <rule id="row-370103423-2">
+        <inputEntry id="UnaryTests_0v6ytby">        <text>true</text>
+</inputEntry>
+        <inputEntry id="UnaryTests_01mx2oi">        <text>false</text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0pzr301">        <text>true</text>
+</outputEntry>
+      </rule>
+      <rule id="row-370103423-3">
+        <inputEntry id="UnaryTests_0kp1y0y">        <text>false</text>
+</inputEntry>
+        <inputEntry id="UnaryTests_1316oqb">        <text></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_09mrktx">        <text>false</text>
+</outputEntry>
+      </rule>
+      <rule id="row-370103423-4">
+        <inputEntry id="UnaryTests_0tev27s">        <text></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_12c3wmd">        <text>true</text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_1ijtiqw">        <text>false</text>
+</outputEntry>
+      </rule>
+      <rule id="row-370103423-5">
+        <inputEntry id="UnaryTests_1k2xdb5">        <text></text>
+</inputEntry>
+        <inputEntry id="UnaryTests_04z2e2d">        <text></text>
+</inputEntry>
+        <outputEntry id="LiteralExpression_0kozsft">        <text>false</text>
+</outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

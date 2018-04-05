@@ -13,11 +13,12 @@ import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.dmn.engine.impl.DmnDecisionTableImpl;
 import org.camunda.bpm.dmn.engine.impl.hitpolicy.DmnHitPolicyException;
-import org.camunda.bpm.model.dmn.BuiltinAggregator;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.HitPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.camunda.consulting.dmn_excel_tester.functional.Tuple;
 
 public class DmnEvaluator {
   
@@ -52,12 +53,10 @@ public class DmnEvaluator {
       
       log.info("Evaluating decision {}", dmnDecision.getName());
       HitPolicy hitPolicy = null;
-      BuiltinAggregator builtinAggregator = null;
       DmnDecisionLogic decisionLogic = dmnDecision.getDecisionLogic();
       if (decisionLogic instanceof DmnDecisionTableImpl) {
         DmnDecisionTableImpl decisionTable = (DmnDecisionTableImpl) decisionLogic;
         hitPolicy = decisionTable.getHitPolicyHandler().getHitPolicyEntry().getHitPolicy();
-        builtinAggregator = decisionTable.getHitPolicyHandler().getHitPolicyEntry().getAggregator();
       };
       log.info("HitPolicy: {}", hitPolicy);
       List<Map<String, Object>> sheetData = testData.get(dmnDecision.getName());
@@ -67,16 +66,30 @@ public class DmnEvaluator {
       }
       // iterate over lines in the sheet
       for (int i = 2; i < sheetData.size(); i++) {
+        Map<String, Object> unexpectedResultPerLine = new HashMap<>();
         Map<String, Object> decisionData = sheetData.get(i);
         Map<String, Object> expectedResultData = ExpectationMapper.getExpectationData.apply(sheetData.get(i));
         try {
           DmnDecisionResult result = dmnEngine.evaluateDecision(dmnDecision, decisionData);
           log.info("Result: {}", result);
-          Map<String, Object> unexpectedResult = new ExpectationMapper().getUnexpectedResults(result, expectedResultData, hitPolicy, builtinAggregator);
-          for (DmnDecisionResultEntries resultEntries : result) {
-            log.info("ResultEntries {}", resultEntries.toString());
+          
+          // iterate over all output columns
+          for (String outputName : expectedResultData.keySet()) {
+            
+            @SuppressWarnings("unchecked")
+            List<Object> expectationsPerOutputName = (List<Object>) expectedResultData.get(outputName);
+            Map<String, Object> unexpectedResult = ExpectationMapper
+                .getUnexpectedResultsForOutputColumn.apply(
+                    result, 
+                    new Tuple<String, List<Object>>(outputName, expectationsPerOutputName)); 
+            for (DmnDecisionResultEntries resultEntries : result) {
+              log.info("ResultEntries {}", resultEntries.toString());
+            }
+            if (unexpectedResult.isEmpty() == false) {
+              unexpectedResultPerLine.putAll(unexpectedResult);
+            }
           }
-          unexpectedResultList.add(unexpectedResult);
+          unexpectedResultList.add(unexpectedResultPerLine);
         } catch (DmnHitPolicyException e) {
           HashMap<String, Object> errorMap = new HashMap<String, Object>();
           String errorMessage = e.getLocalizedMessage();
