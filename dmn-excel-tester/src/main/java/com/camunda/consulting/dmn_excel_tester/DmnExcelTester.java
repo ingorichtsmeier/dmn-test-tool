@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
@@ -153,10 +155,15 @@ public class DmnExcelTester extends Application {
             for (String key : mismatchLine.keySet()) {
               if (mismatchLine.get(key) instanceof EvaluatedResult) {
                 EvaluatedResult evaluatedResult = (EvaluatedResult)mismatchLine.get(key);
-                errorLineBuilder.append(MessageFormat.format("{0}: expected: ''{1}'', result: ''{2}''\n", 
+                
+                @SuppressWarnings("unchecked")
+                List<String> expectedList = (List<String>) evaluatedResult.getExpected();
+                @SuppressWarnings("unchecked")
+                List<String> resultList = (List<String>) evaluatedResult.getResult();
+                errorLineBuilder.append(MessageFormat.format("{0}: expected: {1}, result: {2}\n", 
                     key, 
-                    evaluatedResult.getExpected(), 
-                    evaluatedResult.getResult()));
+                    formatList.apply(expectedList), 
+                    formatList.apply(resultList)));
               } else if (mismatchLine.get(key) instanceof String) {
                 errorLineBuilder.append(mismatchLine.get(key));
               }
@@ -173,6 +180,11 @@ public class DmnExcelTester extends Application {
     }
     return result;
   }
+  
+  public static Function<List<String>, String> formatList = (List<String> list) -> list
+      .stream()
+      .map((element) -> "'" + element + "'")
+      .collect(Collectors.joining(", ", "{", "}"));
   
   private void printUsage() {
     System.out.println("usage: java -jar whatever dmnFile.dmn excelSheet.xlxs" );
