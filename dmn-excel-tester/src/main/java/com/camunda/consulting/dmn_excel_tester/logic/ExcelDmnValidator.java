@@ -8,7 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.camunda.bpm.dmn.engine.DmnDecision;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.instance.Decision;
 import org.camunda.bpm.model.dmn.instance.DecisionTable;
@@ -36,7 +40,7 @@ public class ExcelDmnValidator {
   public List<String> validateMatchingExcelAndDmnModel() {
     List<String> errorResultList = new ArrayList<String>();
     
-    String sheetsAndTablesValidationError = validateMatchingSheetsAndTables(dataFromExcel, dmnModelInstance);
+    String sheetsAndTablesValidationError = validateMatchingSheetsAndTables.apply(dataFromExcel, dmnModelInstance);
     if (sheetsAndTablesValidationError.isEmpty() == false) {
       errorResultList.add(sheetsAndTablesValidationError);
       return errorResultList;
@@ -106,61 +110,34 @@ public class ExcelDmnValidator {
     return errorResultList;
   }
   
-  public String validateMatchingSheetsAndTables(Map<String, List<Map<String, Object>>> dataFromExcel, DmnModelInstance dmnModelInstance) {
-    Collection<Decision> decisions = dmnModelInstance.getModelElementsByType(Decision.class);
-    ArrayList<String> decisionNames = new ArrayList<String>();
-    decisions.forEach(decision -> decisionNames.add(decision.getName()));
-    ArrayList<String> sheetNames = new ArrayList<String>();
-    dataFromExcel.keySet().forEach(sheetName -> sheetNames.add(sheetName));
-    if (decisionNames.size() == 1 && sheetNames.size() == 1) {
-      return "";
-    } else  {
-      return checkMatchingSheetAndTableNames(sheetNames, decisionNames);
-    } 
-  }
-
-  public String checkMatchingSheetAndTableNames(List<String> sheetNames, List<String> decisionNames) {
+  public static BiFunction<List<String>, List<String>, String> checkMatchingSheetAndTableNames = (List<String> sheetNames, List<String> decisonNames) -> {
     StringBuilder result = new StringBuilder();
+    List<String> unmatchedSheets = sheetNames.stream().filter(sheet -> (decisonNames.contains(sheet) == false)).collect(Collectors.toList());
+    List<String> unmatchedDecisions = decisonNames.stream().filter(decision -> (sheetNames.contains(decision) == false)).collect(Collectors.toList());
     
-    List<String> missingDecisionList = new ArrayList<String>();
-    decisionNames.forEach(decisionName -> missingDecisionList.add(decisionName));
-    
-    List<String> unmatchedSheets = new ArrayList<String>();
-    log.info("initial missing table names: {}", missingDecisionList);
-    sheetNames.forEach(sheetName -> {
-      if (decisionNames.contains(sheetName)) {
-        missingDecisionList.remove(sheetName);
-        log.info("removed {}", sheetName);
-      } else { 
-        unmatchedSheets.add(sheetName);
-      }
-    });
     if (unmatchedSheets.size() > 0) {
       result.append("Excel sheet");
-      if (unmatchedSheets.size() > 1) {
-        result.append("s ");
-      } else {
-        result.append(" ");
-      }
-      result.append(MessageFormat.format("''{0}''", unmatchedSheets.get(0)));
-      unmatchedSheets
-        .stream()
-        .skip(1)
-        .forEach(unmatchSheet -> {
-          result.append(MessageFormat.format(" and ''{0}''", unmatchSheet));
-        });
-      result.append(" didn't match decisions ");
-      result.append(MessageFormat.format("''{0}''", missingDecisionList.get(0)));
-      missingDecisionList
-        .stream()
-        .skip(1)
-        .forEach(missingTableName -> {
-          result.append(MessageFormat.format(" or ''{0}''", missingTableName)); 
-        }); 
+      result.append((unmatchedSheets.size() > 1) ? "s " : " ");
+      result.append(unmatchedSheets.stream().map(sheet -> "'" + sheet + "'").collect(Collectors.joining(" and ")));
+      result.append(" didn't match decision");
+      result.append((unmatchedDecisions.size() > 1) ? "s " : " ");
+      result.append(unmatchedDecisions.stream().map(decision -> "'" + decision + "'").collect(Collectors.joining(" or ")));
     }
     return result.toString();
-  }
+  };
 
+  public static BiFunction<Map<String, List<Map<String, Object>>>, DmnModelInstance, String> validateMatchingSheetsAndTables = 
+      (Map<String, List<Map<String, Object>>> dataFromExcel_, DmnModelInstance dmnModelInstance_) -> {
+        Collection<Decision> decisions = dmnModelInstance_.getModelElementsByType(Decision.class);
+        List<String> decisionNames = decisions.stream().map(decision -> decision.getName()).collect(Collectors.toList());
+        List<String> sheetNames = dataFromExcel_.keySet().stream().collect(Collectors.toList());
+        if (decisionNames.size() == 1 && sheetNames.size() == 1) {
+          return "";
+        } else  {
+          return checkMatchingSheetAndTableNames.apply(sheetNames, decisionNames);
+        } 
+      };
+  
   private List<String> collectInputHeaderLabels(DecisionTable decisionTable, List<String> dmnInputHeaderLabels) {
     Collection<Input> dmnInputHeaders = decisionTable.getChildElementsByType(Input.class);
     dmnInputHeaders.forEach(dmnInputHeader -> {
@@ -176,5 +153,9 @@ public class ExcelDmnValidator {
     DecisionTable decisionTable = decision.getChildElementsByType(DecisionTable.class).iterator().next();
     return collectInputHeaderLabels(decisionTable, new ArrayList<String>());
   }
+  
+  public static Function<List<DmnDecision>, Map<String, DmnDecision>> mapDecisionByNames = 
+      (List<DmnDecision> decisions) -> decisions.stream().collect(Collectors.toMap(d -> d.getName(), d -> d));
+
 
 }

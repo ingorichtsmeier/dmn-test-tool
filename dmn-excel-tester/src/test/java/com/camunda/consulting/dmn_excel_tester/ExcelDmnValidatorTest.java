@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.camunda.bpm.dmn.engine.DmnDecision;
+import org.camunda.bpm.dmn.engine.DmnEngine;
+import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -65,14 +68,14 @@ public class ExcelDmnValidatorTest {
     assertThat(errorList).contains("Excel sheet 'Tabelle1' didn't match decisions 'Invoice Classification' or 'Assign Approver Group'");
   }
 
-  public Map<String, List<Map<String, Object>>> readExcelFile(String fileName) throws Docx4JException, Xlsx4jException {
+  private Map<String, List<Map<String, Object>>> readExcelFile(String fileName) throws Docx4JException, Xlsx4jException {
     File excelFile = new File(fileName);
     ExcelSheetReader excelSheetReader = new ExcelSheetReader(excelFile);    
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     return dataFromExcel;
   }
 
-  public DmnModelInstance readDmnModelInstance(String fileName) {
+  private DmnModelInstance readDmnModelInstance(String fileName) {
     File dmnTableFile = new File(fileName);
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
     return dmnModelInstance;
@@ -83,8 +86,7 @@ public class ExcelDmnValidatorTest {
     List<String> sheetNames = Arrays.asList("dish", "beverages");
     List<String> tableNames = Arrays.asList("beverages", "dish");
     
-    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
-    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tableNames);
+    String resultList = ExcelDmnValidator.checkMatchingSheetAndTableNames.apply(sheetNames, tableNames);
     assertThat(resultList).isEmpty();
   }
   
@@ -93,8 +95,7 @@ public class ExcelDmnValidatorTest {
     List<String> tablesNames = Arrays.asList("dish", "beverages");
     List<String> sheetNames = Arrays.asList("Tabelle1");
     
-    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
-    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tablesNames);
+    String resultList = ExcelDmnValidator.checkMatchingSheetAndTableNames.apply(sheetNames, tablesNames);
     assertThat(resultList).isEqualTo("Excel sheet 'Tabelle1' didn't match decisions 'dish' or 'beverages'");
   }
 
@@ -103,8 +104,7 @@ public class ExcelDmnValidatorTest {
     List<String> tablesNames = Arrays.asList("dish", "beverages", "location");
     List<String> sheetNames = Arrays.asList("Tabelle1", "location");
     
-    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
-    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tablesNames);
+    String resultList = ExcelDmnValidator.checkMatchingSheetAndTableNames.apply(sheetNames, tablesNames);
     assertThat(resultList).isEqualTo("Excel sheet 'Tabelle1' didn't match decisions 'dish' or 'beverages'");
   }
 
@@ -113,9 +113,20 @@ public class ExcelDmnValidatorTest {
     List<String> tablesNames = Arrays.asList("dish", "beverages", "location");
     List<String> sheetNames = Arrays.asList("Tabelle1", "Tabelle2", "location");
     
-    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(null, null);
-    String resultList = excelDmnValidator.checkMatchingSheetAndTableNames(sheetNames, tablesNames);
+    String resultList = ExcelDmnValidator.checkMatchingSheetAndTableNames.apply(sheetNames, tablesNames);
     assertThat(resultList).isEqualTo("Excel sheets 'Tabelle1' and 'Tabelle2' didn't match decisions 'dish' or 'beverages'");
   }
+  
+  @Test
+  public void testMapDecisions() {
+    File drdFile = new File("src/test/resources/drd/dinnerDecisions.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(drdFile);
 
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    List<DmnDecision> decisions = dmnEngine.parseDecisions(dmnModelInstance);
+    
+    Map<String, DmnDecision> decisionMap = ExcelDmnValidator.mapDecisionByNames.apply(decisions);
+    
+    assertThat(decisionMap).containsOnlyKeys("Beverages", "Dish");
+  }
 }
