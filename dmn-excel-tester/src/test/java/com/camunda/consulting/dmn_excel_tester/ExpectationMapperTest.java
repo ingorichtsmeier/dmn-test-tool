@@ -1,10 +1,10 @@
 package com.camunda.consulting.dmn_excel_tester;
 
+import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class ExpectationMapperTest {
     testData.put("Number_of_guests", 3);
     testData.put("Expected:_Dish", "Stew");
     Map<String, Object> expectationData = ExpectationMapper.getExpectationData.apply(testData );
-    assertThat(expectationData).containsEntry("Dish", Arrays.asList("Stew"));
+    assertThat(expectationData).containsEntry("Dish", asList("Stew"));
   }
 
   @Test
@@ -42,24 +42,24 @@ public class ExpectationMapperTest {
     testData.put("Expected:_Drink", "Beer");
     Map<String, Object> expectationData = ExpectationMapper.getExpectationData.apply(testData );
     assertThat(expectationData).containsOnly(
-        entry("Dish", Arrays.asList("Stew")), 
-        entry("Drink", Arrays.asList("Beer")));
+        entry("Dish", asList("Stew")), 
+        entry("Drink", asList("Beer")));
   }
   
   @Test
   public void testExpectationsFromList() {
     HashMap<String, Object> testData = new HashMap<String, Object>();
     testData.put("Dish", "Roastbeef");
-    testData.put("Expected:_Drinks", Arrays.asList("Guiness", "Water", "Apple Juice"));
+    testData.put("Expected:_Drinks", asList("Guiness", "Water", "Apple Juice"));
     Map<String, Object> expectationData = ExpectationMapper.getExpectationData.apply(testData);
-    assertThat(expectationData).containsOnly(entry("Drinks", Arrays.asList("Guiness", "Water", "Apple Juice")));
+    assertThat(expectationData).containsOnly(entry("Drinks", asList("Guiness", "Water", "Apple Juice")));
   }
 
   @Test
   public void testExpectedResultFromDish() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Dish";
-    expectedResults.put(outputName, Arrays.asList("Stew"));
+    expectedResults.put(outputName, asList("Stew"));
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
     
     @SuppressWarnings("unchecked")
@@ -73,7 +73,7 @@ public class ExpectationMapperTest {
   @Test
   public void testUnexpectedResultFromDish() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
-    expectedResults.put("Dish", Arrays.asList("Steak"));
+    expectedResults.put("Dish", asList("Steak"));
     DmnDecisionResult decisionResult = evaluateDish3Dmn();
     
     @SuppressWarnings("unchecked")
@@ -81,7 +81,7 @@ public class ExpectationMapperTest {
         .getUnexpectedResultsForOutputColumn.apply(
             decisionResult, 
             new Tuple<String, List<Object>>("Dish", (List<Object>) expectedResults.get("Dish")));
-    assertThat(unexpectedResults).containsEntry("Dish", new EvaluatedResult(Arrays.asList("Steak"), Arrays.asList("Stew")));
+    assertThat(unexpectedResults).containsEntry("Dish", new EvaluatedResult(asList("Steak"), asList("Stew")));
   }
   
   DmnDecisionResult evaluateDish3Dmn() {
@@ -98,7 +98,7 @@ public class ExpectationMapperTest {
   public void testExpectedResultFromList() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Drinks";
-    expectedResults.put(outputName, Arrays.asList("Bordeaux", "Water", "Apple Juice"));
+    expectedResults.put(outputName, asList("Bordeaux", "Water", "Apple Juice"));
     DmnDecisionResult decisionResult = evaluateBeverages();
     
     @SuppressWarnings("unchecked")
@@ -118,7 +118,7 @@ public class ExpectationMapperTest {
   public void testUnexpectedResultFromList() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Drinks";
-    expectedResults.put(outputName, Arrays.asList("Bordeaux", "Pinot Noir", "Apple Juice"));
+    expectedResults.put(outputName, asList("Bordeaux", "Pinot Noir", "Apple Juice"));
     DmnDecisionResult decisionResult = evaluateBeverages();
     
     @SuppressWarnings("unchecked")
@@ -126,7 +126,7 @@ public class ExpectationMapperTest {
         decisionResult, 
         new Tuple<String, List<Object>>(outputName, (List<Object>) expectedResults.get(outputName)));
     assertThat(unexpectedResults).containsOnly(
-        MapEntry.entry(outputName, new EvaluatedResult(Arrays.asList("Pinot Noir"), Arrays.asList("Water"))));
+        MapEntry.entry(outputName, new EvaluatedResult(asList("Pinot Noir"), asList("Water"))));
   }
   
   /* 
@@ -138,7 +138,7 @@ public class ExpectationMapperTest {
   public void testUnexpectedResultFromListSequenceChanged() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Drinks";
-    expectedResults.put(outputName, Arrays.asList("Apple Juice", "Pinot Noir", "Bordeaux"));
+    expectedResults.put(outputName, asList("Apple Juice", "Pinot Noir", "Bordeaux"));
     DmnDecisionResult decisionResult = evaluateBeverages();
     
     @SuppressWarnings("unchecked")
@@ -146,7 +146,7 @@ public class ExpectationMapperTest {
         decisionResult, 
         new Tuple<String, List<Object>>(outputName, (List<Object>) expectedResults.get(outputName)));
     assertThat(unexpectedResults).containsOnly(
-        MapEntry.entry(outputName, new EvaluatedResult(Arrays.asList("Pinot Noir"), Arrays.asList("Water"))));
+        MapEntry.entry(outputName, new EvaluatedResult(asList("Pinot Noir"), asList("Water"))));
   }
   
   /* 
@@ -158,7 +158,7 @@ public class ExpectationMapperTest {
   public void testUnexpectedResultFromListManyErrors() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Drinks";
-    expectedResults.put(outputName, Arrays.asList("Guiness", "Pinot Noir", "Apple Juice"));
+    expectedResults.put(outputName, asList("Guiness", "Pinot Noir", "Apple Juice"));
     DmnDecisionResult decisionResult = evaluateBeverages();
     
     @SuppressWarnings("unchecked")
@@ -167,7 +167,7 @@ public class ExpectationMapperTest {
         new Tuple<String, List<Object>>(outputName, (List<Object>) expectedResults.get(outputName)));
     assertThat(unexpectedResults).containsOnly(
         MapEntry.entry(outputName, 
-            new EvaluatedResult(Arrays.asList("Guiness", "Pinot Noir"), Arrays.asList("Bordeaux", "Water"))));
+            new EvaluatedResult(asList("Guiness", "Pinot Noir"), asList("Bordeaux", "Water"))));
   }
   
   /* 
@@ -179,7 +179,7 @@ public class ExpectationMapperTest {
   public void testUnexpectedResultFromListMoreExpectations() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Drinks";
-    expectedResults.put(outputName, Arrays.asList("Guiness", "Pinot Noir", "Bordeaux", "Water", "Apple Juice"));
+    expectedResults.put(outputName, asList("Guiness", "Pinot Noir", "Bordeaux", "Water", "Apple Juice"));
     DmnDecisionResult decisionResult = evaluateBeverages();
     
     @SuppressWarnings("unchecked")
@@ -188,7 +188,7 @@ public class ExpectationMapperTest {
         new Tuple<String, List<Object>>(outputName, (List<Object>) expectedResults.get(outputName)));
     assertThat(unexpectedResults).containsOnly(
         MapEntry.entry(outputName, 
-            new EvaluatedResult(Arrays.asList("Guiness", "Pinot Noir"), new ArrayList<>())));
+            new EvaluatedResult(asList("Guiness", "Pinot Noir"), new ArrayList<>())));
   }
 
   /* expected: ("Bordeaux", "Water")
@@ -199,7 +199,7 @@ public class ExpectationMapperTest {
   public void testUnexpectedResultFromListMoreResults() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Drinks";
-    expectedResults.put(outputName, Arrays.asList("Bordeaux", "Water"));
+    expectedResults.put(outputName, asList("Bordeaux", "Water"));
     DmnDecisionResult decisionResult = evaluateBeverages();
     
     @SuppressWarnings("unchecked")
@@ -208,7 +208,7 @@ public class ExpectationMapperTest {
         new Tuple<String, List<Object>>(outputName, (List<Object>) expectedResults.get(outputName)));
     assertThat(unexpectedResults).containsOnly(
         MapEntry.entry(outputName, 
-            new EvaluatedResult(new ArrayList<>(), Arrays.asList("Apple Juice"))));
+            new EvaluatedResult(new ArrayList<>(), asList("Apple Juice"))));
   }
   
   private DmnDecisionResult evaluateBeverages() {
@@ -227,9 +227,9 @@ public class ExpectationMapperTest {
   public void testUnexpectedResultfromTwoOutputColumns() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputDrinks = "Drink";
-    expectedResults.put(outputDrinks, Arrays.asList("Bordeaux", "Water"));
+    expectedResults.put(outputDrinks, asList("Bordeaux", "Water"));
     String outputDish = "Dish";
-    expectedResults.put(outputDish, Arrays.asList("Roastbeef"));
+    expectedResults.put(outputDish, asList("Roastbeef"));
     DmnDecisionResult decisionResult = evaluateDishAndDrinkFails();
     
     @SuppressWarnings("unchecked")
@@ -246,8 +246,8 @@ public class ExpectationMapperTest {
     unexpectedResults.putAll(unexpectedDrinks);
     
     assertThat(unexpectedResults).containsOnly(
-        entry(outputDrinks, new EvaluatedResult(Arrays.asList("Bordeaux", "Water"), Arrays.asList("Grauburgunder"))),
-        entry(outputDish, new EvaluatedResult(Arrays.asList("Roastbeef"), Arrays.asList("Stew"))));
+        entry(outputDrinks, new EvaluatedResult(asList("Bordeaux", "Water"), asList("Grauburgunder"))),
+        entry(outputDish, new EvaluatedResult(asList("Roastbeef"), asList("Stew"))));
   }
   
   private DmnDecisionResult evaluateDishAndDrinkFails() {
@@ -266,7 +266,7 @@ public class ExpectationMapperTest {
   public void testExpectedWithTypeConversion() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Score";
-    expectedResults.put(outputName, Arrays.asList("-5"));
+    expectedResults.put(outputName, asList("-5"));
     DmnDecisionResult decisionResult = evaluateScoring();
     
     @SuppressWarnings("unchecked")
@@ -279,14 +279,14 @@ public class ExpectationMapperTest {
   public void testUnexpectedWithTypeConversion() {
     Map<String, Object> expectedResults = new HashMap<String, Object>();
     String outputName = "Score";
-    expectedResults.put(outputName, Arrays.asList("-6"));
+    expectedResults.put(outputName, asList("-6"));
     DmnDecisionResult decisionResult = evaluateScoring();
     
     @SuppressWarnings("unchecked")
     Map<String, Object> unexpectedResults = ExpectationMapper.getUnexpectedResultsForOutputColumn.apply(
         decisionResult, new Tuple<String, List<Object>>(outputName, (List<Object>) expectedResults.get(outputName)));
     assertThat(unexpectedResults).containsOnly(
-        entry(outputName, new EvaluatedResult(Arrays.asList("-6"), Arrays.asList("-5"))));
+        entry(outputName, new EvaluatedResult(asList("-6"), asList("-5"))));
     
   }
   
@@ -305,7 +305,7 @@ public class ExpectationMapperTest {
   public void testNoMatchingRuleResult() {
     HashMap<String, Object> expectedResult = new HashMap<String, Object>();
     String outputName = "Output";
-    expectedResult.put(outputName, Arrays.asList("would not match"));
+    expectedResult.put(outputName, asList("would not match"));
     DmnDecisionResult emptyDecisionResult = evaluateNoMatchingRuleDmn();
     
     @SuppressWarnings("unchecked")
