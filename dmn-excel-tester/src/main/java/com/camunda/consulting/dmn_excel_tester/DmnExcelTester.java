@@ -114,9 +114,8 @@ public class DmnExcelTester extends Application {
     Map<String, List<Map<String, Object>>> dataFromExcel = excelSheetReader.getDataFromExcel();
     
     // validate the excel to decision
-    ExcelDmnValidator excelDmnValidator = new ExcelDmnValidator(dataFromExcel, preparedTable);
     List<Map<String, Object>> tableMismatches = new ArrayList<Map<String, Object>>();
-    List<String> validationResult = excelDmnValidator.validateMatchingExcelAndDmnModel();
+    List<String> validationResult = ExcelDmnValidator.validateExcelAndDmnModel.apply(dataFromExcel, preparedTable);
     if (validationResult.size() > 0) {
       tableMismatches.add(new HashMap<>());
       HashMap<String, Object> validatonErrorMessage = new HashMap<>();
