@@ -15,6 +15,7 @@ import org.camunda.bpm.dmn.engine.DmnDecisionResultEntries;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.dmn.engine.impl.DmnDecisionResultException;
+import org.camunda.bpm.dmn.engine.impl.DmnEvaluationException;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.junit.Test;
@@ -126,6 +127,23 @@ public class ExampleEvaluations {
     assertThat(checkForSingleResult.apply(decisionResult)).isFalse();
   }
   
+  @Test
+  public void evaluateDinnerWithSpecialGuests() {
+    File dmnTableFile = new File("src/test/resources/drd/dinner-with-special-guests.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    DmnDecision dmnDecision = dmnEngine.parseDecision("beverages_decision", dmnModelInstance);
+    Map<String,Object> variables = new HashMap<String, Object>();
+    variables.put("season", "Winter");
+    variables.put("guest_name", "Frank");
+    DmnDecisionResult decisionResult = dmnEngine.evaluateDecision(dmnDecision, variables);
+    System.out.println("CollectEntries (C): " + decisionResult);
+    
+    List<Object> beverages = decisionResult.collectEntries("beverages");
+    assertThat(beverages).containsOnly("Cola", "Champagner");
+  }
+  
   public static Function<DmnDecisionResult, Boolean> checkForSingleEntry = (DmnDecisionResult decisionResult) -> {
     boolean hasSingleEntry;
     try {
@@ -147,5 +165,25 @@ public class ExampleEvaluations {
     }
     return hasSingleResult;
   };
+  
+  @Test
+  public void testEvaluateModeler12() {
+    File dmnTableFile = new File("src/test/resources/exampleEvaluation/modeler12_1.dmn");
+    DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(dmnTableFile);
+    
+    DmnEngine dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
+    DmnDecision dmnDecision = dmnEngine.parseDecision("Decision_1", dmnModelInstance);
+    
+    Map<String,Object> variables = new HashMap<String, Object>();
+    variables.put("guest with children", "hallo");
+    
+    DmnDecisionResult decisionResult;
+    try {
+      decisionResult = dmnEngine.evaluateDecision(dmnDecision, variables);
+    } catch (DmnEvaluationException e) {
+      assertThat(e.getLocalizedMessage()).startsWith("DMN-01002 Unable to evaluate expression for language 'juel': '${guests with children?}'");
+    }
+    //assertThat(decisionResult.collectEntries("label")).containsOnly("f4");
+  }
 
 }
