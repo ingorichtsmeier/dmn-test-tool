@@ -48,7 +48,7 @@
       </rule>
     </decisionTable>
   </decision>
-  <decision id="special_guests_decision" name="Special Guests">
+  <decision id="special_guests_decision" name="Guests">
     <extensionElements>
       <biodi:bounds x="464" y="198" width="180" height="80" />
     </extensionElements>
@@ -59,16 +59,12 @@
         </inputExpression>
       </input>
       <output id="OutputClause_0wfs2ob" label="Special Guests" name="special_guests" typeRef="boolean" />
-      <output id="OutputClause_199e8ee" label="Reason" name="reason" typeRef="string" />
       <rule id="row-30910563-6">
         <inputEntry id="UnaryTests_12jddlq">
           <text><![CDATA["Ingo"]]></text>
         </inputEntry>
         <outputEntry id="LiteralExpression_07avpmp">
           <text>true</text>
-        </outputEntry>
-        <outputEntry id="LiteralExpression_0qm0pu5">
-          <text><![CDATA["It's me"]]></text>
         </outputEntry>
       </rule>
       <rule id="row-30910563-7">
@@ -78,9 +74,6 @@
         <outputEntry id="LiteralExpression_1a4k611">
           <text>true</text>
         </outputEntry>
-        <outputEntry id="LiteralExpression_0i7qelg">
-          <text><![CDATA["Cyclist"]]></text>
-        </outputEntry>
       </rule>
       <rule id="row-30910563-8">
         <inputEntry id="UnaryTests_074lma6">
@@ -88,9 +81,6 @@
         </inputEntry>
         <outputEntry id="LiteralExpression_0waid4q">
           <text>false</text>
-        </outputEntry>
-        <outputEntry id="LiteralExpression_0dahm9v">
-          <text><![CDATA["Nothing"]]></text>
         </outputEntry>
       </rule>
     </decisionTable>
@@ -127,11 +117,6 @@
           <text>special_guests</text>
         </inputExpression>
       </input>
-      <input id="InputClause_1t0b2v4" label="Reason" camunda:inputVariable="">
-        <inputExpression id="LiteralExpression_00ryzgu" typeRef="string">
-          <text>reason</text>
-        </inputExpression>
-      </input>
       <output id="OutputClause_140zedx" label="Beverages" name="beverages" typeRef="string" />
       <rule id="row-30910563-5">
         <inputEntry id="UnaryTests_0uk4hf3">
@@ -139,9 +124,6 @@
         </inputEntry>
         <inputEntry id="UnaryTests_1a8d7dc">
           <text>true</text>
-        </inputEntry>
-        <inputEntry id="UnaryTests_0wkvsqq">
-          <text><![CDATA["It's me"]]></text>
         </inputEntry>
         <outputEntry id="LiteralExpression_085jevc">
           <text><![CDATA["Riesling"]]></text>
@@ -154,9 +136,6 @@
         <inputEntry id="UnaryTests_03dl4ql">
           <text>true</text>
         </inputEntry>
-        <inputEntry id="UnaryTests_1k9vyoq">
-          <text><![CDATA["Cyclist"]]></text>
-        </inputEntry>
         <outputEntry id="LiteralExpression_1qpezzp">
           <text><![CDATA["Cola"]]></text>
         </outputEntry>
@@ -168,9 +147,6 @@
         <inputEntry id="UnaryTests_1dl32cr">
           <text>false</text>
         </inputEntry>
-        <inputEntry id="UnaryTests_1czjmro">
-          <text><![CDATA["Nothing"]]></text>
-        </inputEntry>
         <outputEntry id="LiteralExpression_1s6fyu8">
           <text><![CDATA["Water"]]></text>
         </outputEntry>
@@ -181,9 +157,6 @@
         </inputEntry>
         <inputEntry id="UnaryTests_14vyats">
           <text>true</text>
-        </inputEntry>
-        <inputEntry id="UnaryTests_0dfc7qq">
-          <text></text>
         </inputEntry>
         <outputEntry id="LiteralExpression_12a5v7g">
           <text><![CDATA["Champagner"]]></text>
